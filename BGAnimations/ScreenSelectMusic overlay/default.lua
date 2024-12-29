@@ -1,11 +1,5 @@
 local showVisualizer = themeConfig:get_data().global.ShowVisualizer
 
-local translated_info = {
-	SongsLoaded = THEME:GetString("GeneralInfo", "ProfileSongsLoaded"),
-	GroupsLoaded = THEME:GetString("GeneralInfo", "GroupsLoaded"),
-}
-
-
 local function input(event)
 	-- mouse click events left here to let anything in selectmusic react to them
 	if event.DeviceInput.button == "DeviceButton_left mouse button" then 
@@ -50,14 +44,12 @@ t[#t + 1] = Def.Actor {
 	end,
 }
 
-
-
 t[#t + 1] = LoadActor("../_frame")
 t[#t + 1] = LoadActor("../_PlayerInfo")
 
 if showVisualizer then
 	local vis = audioVisualizer:new {
-		x = capWideScale(get43size(450),400),
+		x = capWideScale(get43size(450),420),
 		y = SCREEN_BOTTOM,
 		maxHeight = 30,
 		freqIntervals = audioVisualizer.multiplyIntervals(audioVisualizer.defaultIntervals, 7),
@@ -78,55 +70,6 @@ if showVisualizer then
 	t[#t + 1] = vis
 end
 
---[[
-t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	Name="TestEvent",
-	InitCommand = function(self)
-		self:xy(400, SCREEN_BOTTOM - 17):halign(0):valign(1):zoom(0.2):diffuse(getMainColor("positive")):hidden(false)
-		self:settextf("test button")
-	end,
-	MouseOverCommand = function(self)
-		self:diffusealpha(hoverAlpha)
-	end,
-	MouseOutCommand = function(self)
-		self:diffusealpha(1)
-	end,
-	ExitQuickMessageCommand = function(self)
-		self:hidden(false)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			MESSAGEMAN:Broadcast("EnteringQuick")
-			SOUND:PlayOnce(THEME:GetPathS("", "Menuopen"))
-			self:hidden(true)
-		end
-	end
-}
-
-t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	Name="TestEventExit",
-	InitCommand = function(self)
-		self:xy(400, SCREEN_BOTTOM - 17):halign(0):valign(1):zoom(0.2):diffuse(getMainColor("positive")):hidden(true)
-		self:settextf("test button exit")
-	end,
-	MouseOverCommand = function(self)
-		self:diffusealpha(hoverAlpha)
-	end,
-	MouseOutCommand = function(self)
-		self:diffusealpha(1)
-	end,
-	EnteringQuickMessageCommand = function(self)
-		self:hidden(false)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			MESSAGEMAN:Broadcast("ExitQuick")
-			SOUND:PlayOnce(THEME:GetPathS("", "Menuclose"))
-			self:hidden(true)
-		end
-	end
-}
-]]
 
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	Name="rando",
@@ -161,16 +104,15 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 			self.lastlastrandom = self.lastrandom
 			self.lastrandom = random_song
 		end
+	end,
+	KBRandomSongMessageComand = function(self)
 	end
 }
 
+t[#t + 1] = LoadActor("../_volumecontrol")
 t[#t + 1] = LoadActor("currentsort")
-t[#t + 1] = LoadActor("../thingy")
 t[#t + 1] = LoadActor("../_cursor")
 t[#t + 1] = LoadActor("../_halppls")
-t[#t + 1] = LoadActor("../_volumecontrol")
-
-
 
 updateDiscordStatusForMenus()
 updateNowPlaying()

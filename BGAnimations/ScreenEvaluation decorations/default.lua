@@ -9,10 +9,6 @@ if GAMESTATE:GetNumPlayersEnabled() == 1 then
 	end
 end
 
-
-
---this REALLY needs a rewrite, at least until the 5th test client releases
-
 --[[
 	This needs a rewrite so that there is a single point of entry for choosing the displayed score, rescoring it, and changing its judge.
 	We "accidentally" started using inconsistent methods of communicating between actors and files due to lack of code design.
@@ -21,8 +17,25 @@ end
 
 local translated_info = {
 	CCOn = THEME:GetString("ScreenEvaluation", "ChordCohesionOn"),
-	MAPARatio = THEME:GetString("ScreenEvaluation", "MAPARatio")
+	MAPARatio = THEME:GetString("ScreenEvaluation", "MAPARatio"),
+	SessionTime = THEME:GetString("GeneralInfo", "SessionTime"),
 }
+
+--from infoplayer
+local function UpdateTime(self)
+	local year = Year()
+	local month = MonthOfYear() + 1
+	local day = DayOfMonth()
+	local hour = Hour()
+	local minute = Minute()
+	local second = Second()
+	self:GetChild("CurrentTime"):settextf("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second)
+
+	local sessiontime = GAMESTATE:GetSessionTime()
+	self:GetChild("SessionTime"):settextf("%s: %s", translated_info["SessionTime"], SecondsToHHMMSS(sessiontime))
+	self:diffuse(nonButtonColor)
+end
+
 
 -- im going to cry
 local aboutToForceWindowSettings = false
@@ -39,7 +52,6 @@ local function scaleToJudge(scale)
 	return out
 end
 
-local hoverAlpha = 0.8
 local judge = PREFSMAN:GetPreference("SortBySSRNormPercent") and 4 or GetTimingDifficulty()
 local judge2 = judge
 local score = SCOREMAN:GetMostRecentScore()
@@ -49,11 +61,12 @@ end
 local dvt = {}
 local totalTaps = 0
 local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats()
+local graderaw = score:GetWifeGrade()
 
-local frameX = 573
-local frameY = 150 
-local frameWidth = SCREEN_CENTER_X - capWideScale(get43size(150),160)
-local linearvariable = 1.3
+
+local frameX = 42
+local frameY = 220
+local frameWidth = SCREEN_CENTER_X - 100
 
 -- dont default to using custom windows and dont persist that state
 -- custom windows are meant to be used as a thing you occasionally check, not the primary way to play the game
@@ -69,15 +82,32 @@ local judges = {
 	"TapNoteScore_Miss"
 }
 
+
+
+--Metadata Variables and table related things
+-----------------------------------------------------------------------------------------------
+local songInfoX = SCREEN_TOP
+local songInfoY = SCREEN_TOP + 22
+
+local someZoomTable = {
+	zoomSongTitle = 1 / 1.5,
+	zoomArtist = 1 / 4,
+	zoomRateString = 1 / 2,
+	zoomSimAuthor = 1 / 6
+}
+-----------------------------------------------------------------------------------------------
+--the metadata in question
+
 t[#t+1] = Def.ActorFrame {
 	Name = "SongInfo",
 
 	LoadFont("Common Large") .. {
 		Name = "SongTitle",
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X, 20):diffusealpha(1)
-			self:zoom(0.33)
-			self:maxwidth(capWideScale(250 / 0.25, 400 / 0.25))
+			self:xy(songInfoX, songInfoY)
+			self:zoom(someZoomTable.zoomSongTitle)
+			self:maxwidth(capWideScale(250 / 0.25, 180 / 0.25))
+			self:halign(0)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -89,15 +119,61 @@ t[#t+1] = Def.ActorFrame {
 	LoadFont("Common Large") .. {
 		Name = "SongArtist",
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X, 35):diffusealpha(1)
-			self:zoom(0.2)
+			self:xy(songInfoX + 2, songInfoY + 23)
+			self:zoom(someZoomTable.zoomArtist)
 			self:maxwidth(180 / 0.25)
+			self:halign(0)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
 		end,
 		SetCommand = function(self)
-			self:settext(GAMESTATE:GetCurrentSong():GetDisplayArtist())	
+			self:settext(GAMESTATE:GetCurrentSong():GetDisplayArtist())
+		end,
+	},
+	LoadFont("Common Large") .. {
+		Name = "SimAuthor",
+		InitCommand = function(self)
+			self:xy(songInfoX + 3, songInfoY + 36)
+			self:zoom(someZoomTable.zoomSimAuthor)
+			self:diffuse(getMainColor("positive"))
+			self:maxwidth(180 / 0.25)
+			self:halign(0)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settext("By: " .. GAMESTATE:GetCurrentSong():GetOrTryAtLeastToGetSimfileAuthor())
+		end,
+	},
+	LoadFont("Common Large") .. {
+		Name = "RateString",
+		InitCommand = function(self)
+			self:xy(songInfoX, songInfoY + 55)
+			self:zoom(someZoomTable.zoomRateString)
+			self:halign(0)
+			self:queuecommand("Set")
+		end,
+		ScoreChangedMessageCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			local top = SCREENMAN:GetTopScreen()
+			local rate
+			if top:GetName() == "ScreenNetEvaluation" then
+				rate = score:GetMusicRate()
+			else
+				rate = top:GetReplayRate()
+				if not rate then rate = getCurRateValue() end
+			end
+			rate = notShit.round(rate,3)
+			local ratestr = getRateString(rate)
+			if ratestr == "1x" then
+				self:settext("")
+			else
+				self:settext(ratestr)
+			end
 		end,
 	},
 	LoadFont("Common Large") .. {
@@ -118,23 +194,34 @@ t[#t+1] = Def.ActorFrame {
 		    end
 		end,
 	},
-	LoadFont("Common Large") .. {
-		Name = "AuthorSim", --thanks for the idea oniichan42
-		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X, 50)
-			self:zoom(0.23)
-			self:maxwidth(capWideScale(250 / 0.25, 180 / 0.25))
-			self:diffuse(getMainColor("positive"))
-		end,
-		BeginCommand = function(self)
-			self:queuecommand("Set")
-		end,
-		SetCommand = function(self)
-			self:settext("By: " ..GAMESTATE:GetCurrentSong():GetOrTryAtLeastToGetSimfileAuthor())
-		end,
-	},
 }
 
+--cdtitle
+t[#t + 1] = Def.Sprite {
+	Texture= GAMESTATE:GetCurrentSong():GetCDTitlePath(),
+	InitCommand=function(self)
+		self:xy(SCREEN_CENTER_X - 60,SCREEN_CENTER_Y - 120):wag()
+
+		local height = self:GetHeight()
+		local width = self:GetWidth()
+
+		if height >= 60 and width >= 75 then
+			if height * (75 / 60) >= width then
+				self:zoom(40 / height)
+			else
+				self:zoom(56.25 / width)
+			end
+		elseif height >= 60 then
+			self:zoom(40 / height)
+		elseif width >= 75 then
+			self:zoom(56.25 / width)
+		else
+			self:zoom(0.75)
+		end
+	end
+}
+
+-----------------------------------------------------------------------------------------------
 -- a helper to get the radar value for a score and fall back to playerstagestats if that fails
 local function gatherRadarValue(radar, score)
     local n = score:GetRadarValues():GetValue(radar)
@@ -272,16 +359,16 @@ local function scoreBoard(pn, position)
 		Def.Quad {
 			Name = "DisplayBG",
 			InitCommand = function(self)
-				self:xy(frameX - 5, frameY + 25)
-				self:zoomto(frameWidth + 12, SCREEN_WIDTH / 3.3)
+				self:xy(frameX - 5, frameY + 5)
+				self:zoomto(frameWidth + 10, 217)
 				self:halign(0):valign(0)
-				self:diffuse(getMainColor("frames")):diffusealpha(0.65)
+				self:diffuse(getMainColor("frames")):diffusealpha(0.7)
 			end,
 		},
 		Def.ActorFrame {
 			Name = "CustomScoringDisplay",
 			InitCommand = function(self)
-				self:xy(frameX - 5, frameY + 49)
+				self:xy(frameX + 70, frameY + 9)
 				self:visible(usingCustomWindows)
 			end,
 			ToggleCustomWindowsMessageCommand = function(self)
@@ -329,36 +416,13 @@ local function scoreBoard(pn, position)
 					MESSAGEMAN:Broadcast("MoveCustomWindowIndex", {direction=1})
 				end
 			end,
-
-			UIElements.QuadButton(1, 1) .. {
-				Name = "BG",
-				InitCommand = function(self)
-					self:zoomto(capWideScale(get43size(235),235), 25)
-					self:halign(0):valign(1)
-					self:diffusealpha(0)
-				end,
-				MouseClickCommand = function(self, params)
-					if self:IsVisible() and usingCustomWindows then
-						if params.event ~= "DeviceButton_left mouse button" then
-							moveCustomWindowConfigIndex(1)
-						else
-							moveCustomWindowConfigIndex(-1)
-						end
-						loadCurrentCustomWindowConfig()
-						MESSAGEMAN:Broadcast("RecalculateGraphs", {judge=judge})
-						lastSnapshot = REPLAYS:GetActiveReplay():GetLastReplaySnapshot()
-						self:GetParent():playcommand("Set")
-						MESSAGEMAN:Broadcast("LoadedCustomWindow")
-					end
-				end,
-			},
 			LoadFont("Common Large") .. {
 				Name = "CustomPercent",
 				InitCommand = function(self)
-					self:xy(8, -4)
-					self:zoom(0.37)
+					self:xy(0, 16)
+					self:zoom(0.45)
 					self:halign(0):valign(1)
-					self:maxwidth(550)
+					self:maxwidth(500)
 				end,
 				SetCommand = function(self)
 					self:diffuse(getGradeColor(score:GetWifeGrade()))
@@ -381,8 +445,8 @@ local function scoreBoard(pn, position)
 		LoadFont("Common Large") .. {
 			Name = "MSDDisplay",
 			InitCommand = function(self)
-				self:xy(frameX + 2, frameY + 50)
-				self:zoom(0.37)
+				self:xy(frameX + 70, frameY + 32)
+				self:zoom(0.5)
 				self:halign(0):valign(0)
 				self:maxwidth(200)
 			end,
@@ -414,8 +478,8 @@ local function scoreBoard(pn, position)
 		LoadFont("Common Large") .. {
 			Name = "SSRDisplay",
 			InitCommand = function(self)
-				self:xy(frameWidth + frameX + 5, frameY + 50)
-				self:zoom(0.37)
+				self:xy(frameWidth + 1, frameY + 32)
+				self:zoom(0.5)
 				self:halign(1):valign(0)
 				self:maxwidth(200)
 			end,
@@ -434,8 +498,8 @@ local function scoreBoard(pn, position)
 		LoadFont("Common Large") .. {
 			Name = "DifficultyName",
 			InitCommand = function(self)
-				self:xy(frameWidth + frameX + 4, frameY + 38)
-				self:zoom(0.23)
+				self:xy(frameWidth + frameX, frameY + 10)
+				self:zoom(0.3)
 				self:halign(1):valign(0)
 				self:maxwidth(200)
 			end,
@@ -449,43 +513,6 @@ local function scoreBoard(pn, position)
 				self:diffuse(getDifficultyColor(GetCustomDifficulty(steps:GetStepsType(), steps:GetDifficulty())))
 			end,
 		},
-		Def.Quad {
-			InitCommand = function(self)
-				self:xy(frameX + capWideScale(get43size(250),35), frameY - 90)
-				self:zoomto(80,25)
-				self:diffuse(getMainColor("frames"))
-			end
-		},
-		LoadFont("Common Large") .. {
-			Name = "RateString",
-			InitCommand = function(self)
-				self:xy(frameX + capWideScale(get43size(250),35), frameY - 90)
-				self:zoom(0.3)
-				self:halign(0.5)
-				self:diffuse(getMainColor("positive"))
-				self:queuecommand("Set")
-			end,
-			ScoreChangedMessageCommand = function(self)
-				self:queuecommand("Set")
-			end,
-			SetCommand = function(self)
-				local top = SCREENMAN:GetTopScreen()
-				local rate
-				if top:GetName() == "ScreenNetEvaluation" then
-					rate = score:GetMusicRate()
-				else
-					rate = top:GetReplayRate()
-					if not rate then rate = getCurRateValue() end
-				end
-				rate = notShit.round(rate,3)
-				local ratestr = getRateString(rate)
-				if ratestr == "1x" then
-					self:settext("Rate: 1.0x")
-				else
-					self:settext("Rate: " .. ratestr)
-				end
-			end,
-		},
 		Def.ActorFrame {
 			Name = "WifeDisplay",
 			ForceWindowMessageCommand = function(self, params)
@@ -494,7 +521,7 @@ local function scoreBoard(pn, position)
 			UIElements.QuadButton(1, 1) .. {
 				Name = "MouseHoverBG",
 				InitCommand = function(self)
-					self:xy(frameX + 3, frameY + 37)
+					self:xy(frameX + 70, frameY + 9)
 					self:zoomto(capWideScale(320,490)/2.2,20)
 					self:halign(0):valign(0)
 					self:diffusealpha(0)
@@ -519,12 +546,47 @@ local function scoreBoard(pn, position)
 				end,
 			},
 			LoadFont("Common Large") .. {
+				Name = "msdTextExplain",
+			InitCommand = function(self)
+				self:xy(frameX + frameWidth - 170, frameY + 45)
+				self:zoom(0.2)
+				self:settext("MSD")
+			end,
+			},
+			LoadFont("Common Large") .. {
+				Name = "ssrTextExplain",
+			InitCommand = function(self)
+				self:xy(frameX + frameWidth - 20, frameY + 45)
+				self:zoom(0.2)
+				self:settext("SSR")
+			end, 
+			},
+			LoadFont("Common Large") .. {
+				Name = "Grade",
+			InitCommand = function(self)
+				self:xy(frameX + 30, frameY + 30)
+				self:zoom(0.75)
+				self:maxwidth(70)
+				self:settext("")
+			end, 
+			BeginCommand = function(self)
+				self:queuecommand("Set")
+			end,
+			SetCommand = function(self)
+				self:settext(getGradeStrings(graderaw))
+				self:diffuse(getGradeColor(graderaw))
+			end,
+			ScoreChangedMessageCommand = function(self)
+				self:queuecommand("Set")
+			end,
+			},
+			LoadFont("Common Large") .. {
 				Name = "NormalText",
 				InitCommand = function(self)
-					self:xy(frameX + 3, frameY + 32)
-					self:zoom(0.37)
+					self:xy(frameX + 70, frameY + 9)
+					self:zoom(0.45)
 					self:halign(0):valign(0)
-					self:maxwidth(550)
+					self:maxwidth(capWideScale(320, 500))
 					self:visible(true)
 				end,
 				BeginCommand = function(self)
@@ -587,10 +649,10 @@ local function scoreBoard(pn, position)
 			LoadFont("Common Large") ..	{-- high precision rollover
 				Name = "LongerText",
 				InitCommand = function(self)
-					self:xy(frameX + 3, frameY + 32)
-					self:zoom(0.37)
+					self:xy(frameX + 70, frameY + 9)
+					self:zoom(0.45)
 					self:halign(0):valign(0)
-					self:maxwidth(550)
+					self:maxwidth(capWideScale(320, 500))
 					self:visible(false)
 				end,
 				BeginCommand = function(self)
@@ -645,6 +707,30 @@ local function scoreBoard(pn, position)
 					end
 				end,
 			},
+		},
+		LoadFont("Common Normal") .. {
+			Name = "ModString",
+			InitCommand = function(self)
+				self:xy(frameX + 2.4, frameY + 63)
+				self:zoom(0.40)
+				self:halign(0)
+				self:maxwidth(frameWidth / 0.41)
+			end,
+			BeginCommand = function(self)
+				self:queuecommand("Set")
+			end,
+			SetCommand = function(self)
+				local mstring = GAMESTATE:GetPlayerState():GetPlayerOptionsString("ModsLevel_Current")
+				local ss = SCREENMAN:GetTopScreen():GetStageStats()
+				if not ss:GetLivePlay() then
+					mstring = SCREENMAN:GetTopScreen():GetReplayModifiers()
+				end
+				self:settext(getModifierTranslations(mstring))
+			end,
+			ScoreChangedMessageCommand = function(self)
+				local mstring = score:GetModifiers()
+				self:settext(getModifierTranslations(mstring))
+			end,
 		},
 		LoadFont("Common Large") .. {
 			Name = "ChordCohesionIndicator",
@@ -741,26 +827,6 @@ local function scoreBoard(pn, position)
 				end,
 			},
 			LoadFont("Common Large") .. {
-				Name = "NameShadow",
-				InitCommand = function(self)
-					self:xy(frameX + 10, frameY + 80.5 + ((judgmentIndex - 1) * 22))
-					self:zoom(0.25)
-					self:halign(0)
-					self:diffuse(getMainColor("frames"))
-				end,
-				BeginCommand = function(self)
-					if aboutToForceWindowSettings then return end
-					self:queuecommand("Set")
-				end,
-				SetCommand = function(self)
-					if usingCustomWindows then
-						self:settext(getCustomWindowConfigJudgmentName(judgmentName))
-					else
-						self:settext(getJudgeStrings(judgmentName))
-					end
-				end,
-			},
-			LoadFont("Common Large") .. {
 				Name = "Name",
 				InitCommand = function(self)
 					self:xy(frameX + 10, frameY + 79.3 + ((judgmentIndex - 1) * 22))
@@ -780,26 +846,10 @@ local function scoreBoard(pn, position)
 				end,
 			},
 			LoadFont("Common Large") .. {
-				Name = "CountShadow",
-				InitCommand = function(self)
-					self:xy(frameX + frameWidth - 40, frameY + 80.8 + ((judgmentIndex - 1) * 22))
-					self:zoom(0.3)
-					self:halign(1)
-					self:diffuse(getMainColor("frames"))
-				end,
-				BeginCommand = function(self)
-					if aboutToForceWindowSettings then return end
-					self:queuecommand("Set")
-				end,
-				SetCommand = function(self)
-					self:settext(self:GetParent().jcount)
-				end,
-			},
-			LoadFont("Common Large") .. {
 				Name = "Count",
 				InitCommand = function(self)
 					self:xy(frameX + frameWidth - 40, frameY + 79.3 + ((judgmentIndex - 1) * 22))
-					self:zoom(0.3)
+					self:zoom(0.25)
 					self:halign(1)
 				end,
 				BeginCommand = function(self)
@@ -837,20 +887,136 @@ local function scoreBoard(pn, position)
 	end
 	t[#t+1] = jc
 
+	-- Boolean to check whether shift or alt/backslash is held
+	local shiftHeld = false
+
+	t[#t+1] = Def.ActorFrame {
+		OnCommand = function(self)
+			SCREENMAN:GetTopScreen():AddInputCallback(function(event)
+				-- Detect if first or repeated shift press
+				local button = event.DeviceInput.button
+				if button == "DeviceButton_left shift" or button == "DeviceButton_right shift" or button == "DeviceButton_tab" then
+					if event.type == "InputEventType_FirstPress" or event.type == "InputEventType_Repeat" then
+						if not shiftHeld then
+							shiftHeld = true
+							MESSAGEMAN:Broadcast("ShiftPressed")
+						end
+					elseif event.type == "InputEventType_Release" then
+						if shiftHeld then
+							shiftHeld = false
+							MESSAGEMAN:Broadcast("ShiftReleased")
+						end
+					end
+				end
+			end)
+		end
+	}
+
+	-- Function for calculating RA and LA, returns the ratio of ridiculous to marvelous and ludicrous to ridiculous from offset plot in replay.
+	local function calculateRatios(score)
+		-- Get replay depending on whether custom windows were used or not
+		local replay = usingCustomWindows and REPLAYS:GetActiveReplay() or score:GetReplay()
+		replay:LoadAllData()
+		-- Offset and tap note vectors from replay
+		local offsetTable = replay:GetOffsetVector()
+		local typeTable = replay:GetTapNoteTypeVector()
+
+		if not offsetTable or #offsetTable == 0 or not typeTable or #typeTable == 0 then
+			return -1, -1, -1
+		end
+
+		-- Define judgement windows
+		local window = usingCustomWindows and getCurrentCustomWindowConfigJudgmentWindowTable() or {
+			TapNoteScore_W1 = 22.5 * ms.JudgeScalers[judge], -- j4 marv
+			TapNoteScore_W2 = 45 * ms.JudgeScalers[judge],   -- j4 perf
+			TapNoteScore_W3 = 90 * ms.JudgeScalers[judge],   -- j4 g
+		}
+		-- Define RA and LA thresholds
+		window["TapNoteScore_W0"] = window["TapNoteScore_W1"] / 2 -- ra threshold
+		window["TapNoteScore_W-1"] = window["TapNoteScore_W0"] / 2 -- la threshold
+
+		local laThreshold = window["TapNoteScore_W-1"]
+		local raThreshold = window["TapNoteScore_W0"]
+		local marvThreshold = window["TapNoteScore_W1"] -- marv
+
+		local ludic = 0
+		local ridicLA = 0
+		local ridic = 0
+		local marvRA = 0
+
+		-- Iterate over offset table
+		for i, o in ipairs(offsetTable) do
+			-- Check if note is tap or hold
+			if typeTable[i] == "TapNoteType_Tap" or typeTable[i] == "TapNoteType_HoldHead" then
+				local off = math.abs(o)
+				if off <= raThreshold then
+					ridic = ridic + 1
+				elseif off <= marvThreshold then
+					marvRA = marvRA + 1
+				end
+				if off <= laThreshold then
+					ludic = ludic + 1
+				elseif off <= raThreshold then
+					ridicLA = ridicLA + 1
+				end
+			end
+		end
+
+		-- Return ratios, ridic count, and marv count
+		local ridiculousAttack = ridic / marvRA
+		local ludicrousAttack = ludic / ridicLA
+		return ridiculousAttack, ludicrousAttack, ridicLA, marvRA
+	end
+
 	--[[
-	The following section first adds the ratioText and the maRatio. Then the paRatio is added and positioned. The right
-	values for maRatio and paRatio are then filled in. Finally ratioText and maRatio are aligned to paRatio.
+	The following section first adds the ratioText, laRatio, raRatio, maRatio, and paRatio. Then the correct values are filled in.
+	When shift or alt/backslash is held, the display changes accordingly.
 	--]]
-	local ratioText, maRatio, paRatio, marvelousTaps, perfectTaps, greatTaps
+	local ratioText, raRatio, laRatio, maRatio, paRatio, marvelousTaps, perfectTaps, greatTaps
+	local mapaHover = nil
 	t[#t+1] = Def.ActorFrame {
 		Name = "MAPARatioContainer",
 
+		UIElements.QuadButton(1,1) .. {
+			Name = "MAPAHoverThing",
+			InitCommand = function(self)
+				self:xy(frameX + frameWidth/3, frameY + 5 + 218)
+				self:zoomto(frameWidth/3 * 2 + 5, 25)
+				self:halign(0):valign(1)
+				self:diffusealpha(0)
+				mapaHover = self
+			end,
+			MouseOverCommand = function(self)
+				self:GetParent():GetChild("PAText"):playcommand("Set")
+			end,
+			MouseOutCommand = function(self)
+				self:GetParent():GetChild("PAText"):playcommand("Set")
+			end,
+		},
 		LoadFont("Common Large") .. {
 			Name = "Text",
 			InitCommand = function(self)
 				ratioText = self
 				self:settextf("%s:", translated_info["MAPARatio"])
 				self:zoom(0.25):halign(1)
+			end
+		},
+		LoadFont("Common Large") .. {
+			Name = "LAText",
+			InitCommand = function(self)
+				laRatio = self
+				self:settextf("%.2f:1", 0)
+				self:zoom(0.25):halign(1):rainbow() -- Rainbow cuz it's LA man come on
+				self:visible(false)
+			end
+		},
+		LoadFont("Common Large") .. {
+			Name = "RAText",
+			InitCommand = function(self)
+				raRatio = self
+				self:settextf("%.2f:1", 0)
+				self:zoom(0.25):halign(1)  -- No color, user can set whatever they want here. AAAAA is white so I left as white
+				self:visible(false)
 			end
 		},
 		LoadFont("Common Large") .. {
@@ -875,32 +1041,82 @@ local function scoreBoard(pn, position)
 				self:playcommand("Set")
 			end,
 			SetCommand = function(self)
-
-				-- Fill in maRatio and paRatio
+				-- Fill in raRatio, laRatio, maRatio, and paRatio
+				local ridiculousAttack, ludicrousAttack, ridics, marvs = calculateRatios(score)
 				maRatio:settextf("%.1f:1", marvelousTaps / perfectTaps)
 				paRatio:settextf("%.1f:1", perfectTaps / greatTaps)
+				raRatio:settextf("%.2f:1", ridiculousAttack)
+				laRatio:settextf("%.2f:1", ludicrousAttack)
 
-				-- Align ratioText and maRatio to paRatio (self)
-				maRatioX = paRatio:GetX() - paRatio:GetZoomedWidth() - 10
-				maRatio:xy(maRatioX, paRatio:GetY())
+				-- Align with where paRatio was and move things accordingly
+				if shiftHeld and isOver(mapaHover) then
+					-- Show LA/RA ratios
+					laRatio:visible(true)
+					raRatio:visible(true)
+					maRatio:visible(false)
+					paRatio:visible(false)
 
-				ratioTextX = maRatioX - maRatio:GetZoomedWidth() - 10
-				ratioText:xy(ratioTextX, paRatio:GetY())
+					raRatio:settextf("%.2f:1", ridics / marvs) -- ridic:marv
+					raRatio:xy(paRatio:GetX(), paRatio:GetY())
+					local laRatioX = raRatio:GetX() - raRatio:GetZoomedWidth() - 10
+					laRatio:xy(laRatioX, raRatio:GetY())
+					local ratioTextX = laRatioX - laRatio:GetZoomedWidth() - 10
+					ratioText:xy(ratioTextX, raRatio:GetY())
+
+					ratioText:settextf("LA/RA ratio:")
+				elseif shiftHeld or isOver(mapaHover) then
+					-- Show RA/MA ratios
+					raRatio:visible(true)
+					laRatio:visible(false)
+					maRatio:visible(true)
+					paRatio:visible(false)
+
+					maRatio:settextf("%.1f:1", marvs / perfectTaps) -- marv:perf
+					raRatio:xy(paRatio:GetX() - maRatio:GetZoomedWidth() - 10, paRatio:GetY())
+					maRatio:xy(paRatio:GetX(), paRatio:GetY())
+					local ratioTextX = raRatio:GetX() - raRatio:GetZoomedWidth() - 10
+					ratioText:xy(ratioTextX, paRatio:GetY())
+
+					ratioText:settextf("RA/MA ratio:")
+				else
+					-- Show MA/PA ratios
+					raRatio:visible(false)
+					laRatio:visible(false)
+					maRatio:visible(true)
+					paRatio:visible(true)
+
+					maRatio:settextf("%.1f:1", marvelousTaps / perfectTaps) -- marv:perf
+					local maRatioX = paRatio:GetX() - paRatio:GetZoomedWidth() - 10
+					maRatio:xy(maRatioX, paRatio:GetY())
+					local ratioTextX = maRatioX - maRatio:GetZoomedWidth() - 10
+					ratioText:xy(ratioTextX, paRatio:GetY())
+
+					ratioText:settextf("%s:", translated_info["MAPARatio"])
+				end
+
 				if score:GetChordCohesion() == true then
 					maRatio:maxwidth(maRatio:GetZoomedWidth()/0.25)
 					self:maxwidth(self:GetZoomedWidth()/0.25)
 					ratioText:maxwidth(capWideScale(get43size(65), 85)/0.27)
 				end
 			end,
+
+			ShiftPressedMessageCommand = function(self)
+				self:playcommand("Set")
+			end,
+			ShiftReleasedMessageCommand = function(self)
+				self:playcommand("Set")
+			end,
+
 			CodeMessageCommand = function(self, params)
 				if usingCustomWindows then
 					return
 				end
 
 				if params.Name == "PrevJudge" or params.Name == "NextJudge" then
-						marvelousTaps = getRescoredJudge(dvt, judge, 1)
-						perfectTaps = getRescoredJudge(dvt, judge, 2)
-						greatTaps = getRescoredJudge(dvt, judge, 3)
+					marvelousTaps = getRescoredJudge(dvt, judge, 1)
+					perfectTaps = getRescoredJudge(dvt, judge, 2)
+					greatTaps = getRescoredJudge(dvt, judge, 3)
 					self:playcommand("Set")
 				end
 				if params.Name == "ResetJudge" then
@@ -927,64 +1143,6 @@ local function scoreBoard(pn, position)
 			end,
 		},
 	}
-
-	local radars = {"Holds", "Mines", "Rolls", "Lifts", "Fakes"}
-	local radars_translated = {
-		Holds = THEME:GetString("RadarCategory", "Holds"),
-		Mines = THEME:GetString("RadarCategory", "Mines"),
-		Rolls = THEME:GetString("RadarCategory", "Rolls"),
-		Lifts = THEME:GetString("RadarCategory", "Lifts"),
-		Fakes = THEME:GetString("RadarCategory", "Fakes")
-	}
-	local function radarEntry(i)
-		return Def.ActorFrame {
-			Name = "Radar"..radars[i],
-
-			LoadFont("Common Normal") .. {
-				InitCommand = function(self)
-					self:xy(frameX + 20, frameY + 220 + 10 * i)
-					self:zoom(0.4)
-					self:halign(0)
-					self:settext(radars_translated[radars[i]])
-				end,
-			},
-			LoadFont("Common Normal") .. {
-				InitCommand = function(self)
-					self:xy(frameX + 120, frameY + 220 + 10 * i)
-					self:zoom(0.4)
-					self:halign(1)
-				end,
-				BeginCommand = function(self)
-					self:queuecommand("Set")
-				end,
-				SetCommand = function(self)
-					self:settextf(
-						"%03d/%03d",
-						gatherRadarValue("RadarCategory_" .. radars[i], score),
-						score:GetRadarPossible():GetValue("RadarCategory_" .. radars[i])
-					)
-				end,
-				ScoreChangedMessageCommand = function(self)
-					self:queuecommand("Set")
-				end,
-			},
-		}
-	end
-	local rb = Def.ActorFrame {
-		Name = "RadarContainer",
-		Def.Quad {
-			Name = "BG",
-			InitCommand = function(self)
-				self:xy(frameX - 5, frameY + 1006):zoomto(frameWidth / 2 - 10, 56.5) --the game straight up refuses to work if i delete this so i'll just put it too high
-				self:halign(0):valign(0)
-				self:diffuse(getMainColor("tabs"))
-			end,
-		},
-	}
-	for i = 1, #radars do
-		rb[#rb+1] = radarEntry(i)
-	end
-	t[#t+1] = rb
 
 	local function scoreStatistics(score)
 		local replay = usingCustomWindows and REPLAYS:GetActiveReplay() or score:GetReplay()
@@ -1105,17 +1263,21 @@ local function scoreBoard(pn, position)
 			cbr,
 			cbm
 		}
+
+		local frameWidthStat = SCREEN_CENTER_X + 20
+		local frameYStat = 65
+
 		-- if theres a middle lane, display its cbs too
 		local lines = ((ncol+1) % 2 == 0) and #statNames-1  or #statNames
 		local tzoom = lines == 5 and 0.4 or 0.3
-		local ySpacing = lines == 5 and 10 or 8.5
+		local xSpacing = 76
 		local function statsLine(i)
 			return Def.ActorFrame {
 				Name = "StatLine"..statNames[i],
 				LoadFont("Common Normal") .. {
 					Name = "StatText",
 					InitCommand = function(self)
-						self:xy(frameX + capWideScale(get43size(200), 143), frameY + 220 + ySpacing * i)
+						self:xy(frameWidthStat - 35 + xSpacing * i, frameYStat + 213)
 						self:zoom(tzoom)
 						self:halign(0)
 						self:settext(statNames[i])
@@ -1129,12 +1291,12 @@ local function scoreBoard(pn, position)
 					SetCommand = function(self, params)
 						local statValues = scoreStatistics(params ~= nil and params.score or score)
 						if i < 4 then
-							self:xy(frameWidth + capWideScale(get43size(0),560), frameY + 220 + ySpacing * i)
+							self:xy(frameWidthStat + xSpacing * i, frameYStat + 224)
 							self:zoom(tzoom)
 							self:halign(1)
 							self:settextf("%5.2fms", statValues[i])
 						else
-							self:xy(frameWidth + capWideScale(get43size(0),560), frameY + 220 + ySpacing * i)
+							self:xy(frameWidthStat + xSpacing * i, frameYStat + 224)
 							self:zoom(tzoom)
 							self:halign(1)
 							self:settext(statValues[i])
@@ -1167,10 +1329,10 @@ local function scoreBoard(pn, position)
 			Def.Quad {
 				Name = "BG",
 				InitCommand = function(self)
-					self:diffuse(getMainColor("tabs"))
-					self:xy(frameWidth + 25, frameY + 2226) -- too lazy to remove the container soooo i'll just put it rlly high, maybe i will remove it one day if im not that lazy -ifwas
-					self:zoomto(frameWidth / 2 + 10, 56.5) -- 56.5 original value
-					self:halign(1):valign(0)
+					self:diffuse(getMainColor("frames")):diffusealpha(0.7)
+					self:xy(frameWidthStat, frameYStat + 205)
+					self:zoomto(404, 30)
+					self:halign(0):valign(0)
 				end,
 			},
 		}
@@ -1180,147 +1342,51 @@ local function scoreBoard(pn, position)
 		t[#t+1] = sl
 	end
 
-	
-
--- life graph
-	local function GraphDisplay()
-		return Def.ActorFrame {
-			Def.GraphDisplay {
-				InitCommand = function(self)
-					self:Load("GraphDisplay")
-				end,
-				BeginCommand = function(self)
-					local ss = SCREENMAN:GetTopScreen():GetStageStats()
-					self:Set(ss, ss:GetPlayerStageStats())
-					self:diffusealpha(0.7)
-					self:GetChild("Line"):diffusealpha(0)
-					self:zoom(0.65)
-					self:xy(capWideScale(get43size(0),96), 220)
-					self:zoomto(403, 30)
-				end,
-				ScoreChangedMessageCommand = function(self)
-					if score and judge then
-						self:playcommand("RecalculateGraphs", {judge=judge})
-					end
-				end,
-				RecalculateGraphsMessageCommand = function(self, params)
-					-- called by the end of a codemessagecommand somewhere else
-					if not ms.JudgeScalers[params.judge] then return end
-					local success = SCREENMAN:GetTopScreen():RescoreReplay(SCREENMAN:GetTopScreen():GetStageStats():GetPlayerStageStats(), ms.JudgeScalers[params.judge], score, usingCustomWindows and currentCustomWindowConfigUsesOldestNoteFirst())
-					if not success then ms.ok("Retard you broke something lmao") return end
-					self:playcommand("Begin")
-					MESSAGEMAN:Broadcast("SetComboGraph")
-				end,
-			},
-		}
-	end
-
-	-- combo graph
-	local function ComboGraph()
-		return Def.ActorFrame {
-			Def.ComboGraph {
-				InitCommand = function(self)
-					self:Load("ComboGraph")
-				end,
-				BeginCommand = function(self)
-					local ss = SCREENMAN:GetTopScreen():GetStageStats()
-					self:Set(ss, ss:GetPlayerStageStats())
-					self:zoom(0.65)
-					self:xy(capWideScale(get43size(0),118), 190)
-					self:zoomto(403, 10)
-				end,
-				SetComboGraphMessageCommand = function(self)
-					self:Clear()
-					self:Load("ComboGraph")
-					self:playcommand("Begin")
-				end,
-			},
-		}
-	end
-
-	t[#t + 1] = StandardDecorationFromTable("GraphDisplay" .. ToEnumShortString(PLAYER_1), GraphDisplay())
-	t[#t + 1] = StandardDecorationFromTable("ComboGraph" .. ToEnumShortString(PLAYER_1), ComboGraph())
-
 	return t
 end
-
---this is so badly coded, don't do this, i only did this because i was tired
-local tabindex = "local"
-
-t[#t + 1] = UIElements.QuadButton(1, 1) .. {
-	Name = "TabBGOnline",
-	InitCommand = function(self)
-		self:xy(168, SCREEN_CENTER_Y - 4):zoomto(50, 20):diffusecolor(getMainColor("frames")):diffusealpha(0.7):valign(1)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" and tabindex == "local" then
-			MESSAGEMAN:Broadcast("ChangingTabToScore")
-			self:diffusecolor(Brightness(getMainColor("positive"),0.3)):diffusealpha(0.5)
-			self:linear(0.2):zoomto(50,25)
-		end
-	end,
-	ExitTabScoreMessageCommand = function(self)
-		tabindex = "local"
-		self:diffusecolor(getMainColor("frames")):diffusealpha(0.7)
-		self:linear(0.2):zoomto(50,20)
-	end
-}
-
-t[#t + 1] = LoadFont("Common Large") .. {
-	Name="TestEventLeaderboard",
-	InitCommand = function(self)
-		self:xy(155, SCREEN_CENTER_Y - 10):halign(0):valign(1):zoom(0.2):diffuse(getMainColor("positive"))
-		self:settextf("Online")
-	end,
-	ChangingTabToScoreMessageCommand = function(self)
-		self:linear(0.2):xy(155, SCREEN_CENTER_Y - 15)
-	end,
-	ExitTabScoreMessageCommand = function(self)
-		self:linear(0.2):xy(155, SCREEN_CENTER_Y - 10)
-	end
-}
-
-t[#t + 1] = UIElements.QuadButton(1, 1) .. {
-	Name = "TabBGOffline",
-	InitCommand = function(self)
-		self:xy(118, SCREEN_CENTER_Y - 4):zoomto(50, 25):diffusecolor(Brightness(getMainColor("positive"),0.3)):diffusealpha(0.5):valign(1)
-	end,
-	ChangingTabToScoreMessageCommand = function(self)
-		tabindex = "online"
-		self:diffusecolor(getMainColor("frames")):diffusealpha(0.7)
-		self:linear(0.2):zoomto(50,20)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" and tabindex == "online" then
-			MESSAGEMAN:Broadcast("ExitTabScore")
-			self:diffusecolor(Brightness(getMainColor("positive"),0.3)):diffusealpha(0.5)
-			self:linear(0.2):zoomto(50,25)
-		end
-	end
-}
-
-t[#t + 1] = LoadFont("Common Large") .. {
-	Name="TestEventExitLead",
-	InitCommand = function(self)
-		self:xy(107, SCREEN_CENTER_Y - 15):halign(0):valign(1):zoom(0.2):diffuse(getMainColor("positive"))
-		self:settextf("Local")
-	end,
-	ChangingTabToScoreMessageCommand = function(self)
-		self:linear(0.2):xy(107, SCREEN_CENTER_Y - 10)
-	end,
-	ExitTabScoreMessageCommand = function(self)
-		self:linear(0.2):xy(107, SCREEN_CENTER_Y - 15)
-	end
-}
 
 if GAMESTATE:IsPlayerEnabled() then
 	t[#t + 1] = scoreBoard(PLAYER_1, 0)
 end
 
-t[#t + 1] = LoadActor("onlinething")
-t[#t + 1] = LoadActor("../_xoon2")
+
+t[#t + 1] = Def.ActorFrame {
+	InitCommand = function(self)
+		self:SetUpdateFunction(UpdateTime)
+	end,
+	Def.Quad {
+		InitCommand = function(self)
+			self:xy(SCREEN_RIGHT - 43, SCREEN_HEIGHT - 6)
+			self:zoomto(120,25)
+			self:diffuse(getMainColor("frames")):diffusealpha(0.8)
+		end
+	},
+	Def.Quad {
+		InitCommand = function(self)
+			self:xy(SCREEN_LEFT + 80, SCREEN_HEIGHT - 6)
+			self:zoomto(160,25)
+			self:diffuse(getMainColor("frames")):diffusealpha(0.8)
+		end
+	},
+	LoadFont("Common Normal") .. {
+		Name = "CurrentTime",
+		InitCommand = function(self)
+			self:xy(SCREEN_RIGHT - 5, SCREEN_HEIGHT - 6):halign(1):valign(1):zoom(0.39)
+			self:diffuse(getMainColor("positive"))
+		end
+	},
+
+	LoadFont("Common Normal") .. {
+		Name = "SessionTime",
+		InitCommand = function(self)
+			self:xy(SCREEN_LEFT + 5, SCREEN_HEIGHT - 6):halign(0):valign(1):zoom(0.41)
+			self:diffuse(getMainColor("positive"))
+			--(AvatarX + 53, AvatarY - 419):halign(0.5):valign(1):zoom(0.3)
+		end
+	}
+}
+
 t[#t + 1] = LoadActor("../offsetplot")
-t[#t + 1] = LoadActor("../_volumecontrol")
 updateDiscordStatus(true)
 
 return t

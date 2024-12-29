@@ -947,8 +947,6 @@ t[#t + 1] = LoadFont("Common Normal") .. {
 ]]
 
 
-t[#t + 1] = LoadActor("../puta")
-
 
 -- online score display
 ret[#ret + 1] = LoadActor("../superscoreboard")

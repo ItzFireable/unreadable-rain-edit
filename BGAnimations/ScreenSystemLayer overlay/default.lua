@@ -1,6 +1,4 @@
 local t = Def.ActorFrame {}
-
-
 -- Text
 t[#t + 1] =
 	Def.ActorFrame {

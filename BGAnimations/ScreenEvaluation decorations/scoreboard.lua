@@ -1,6 +1,6 @@
 local lines = 5 -- number of scores to display
-local framex = SCREEN_CENTER_X - 400
-local framey = 45
+local framex = SCREEN_WIDTH - capWideScale(get43size(230), 230)
+local framey = 60
 local frameWidth = capWideScale(get43size(220), 220)
 local spacing = 34
 
@@ -59,13 +59,7 @@ local t = Def.ActorFrame {
 	Name = "scoreBoard",
 	OnCommand = function(self)
 		SCREENMAN:GetTopScreen():AddInputCallback(input)
-	end,
-	ChangingTabToScoreMessageCommand = function(self)
-        self:bouncebegin(0.2):xy(-700, 0):diffusealpha(0)
-    end,
-    ExitTabScoreMessageCommand = function(self)
-        self:bouncebegin(0.2):xy(0, 0):diffusealpha(1)
-    end
+	end
 }
 
 local function scoreitem(pn, index, scoreIndex, drawindex)
@@ -121,7 +115,7 @@ local function scoreitem(pn, index, scoreIndex, drawindex)
 			InitCommand = function(self)
 				self:xy(framex, framey + (drawindex * spacing) - 4):zoomto(frameWidth, 30):halign(0):valign(0):diffuse(
 					color("#333333")
-				):diffusealpha(0.3)
+				):diffusealpha(1):diffuserightedge(color("#33333333"))
 			end,
 			BeginCommand = function(self)
 				self:visible(GAMESTATE:IsHumanPlayer())
@@ -132,7 +126,7 @@ local function scoreitem(pn, index, scoreIndex, drawindex)
 			InitCommand = function(self)
 				self:xy(framex, framey + (drawindex * spacing) - 4):zoomto(frameWidth, 30):halign(0):valign(0):diffuse(
 					color("#ffffff")
-				):diffusealpha(0.3)
+				):diffusealpha(0.3):diffuserightedge(color("#33333300"))
 			end,
 			HahaThisCodeINeedHelpCommand = function(self, params)
 				local equis = params.doot == index
@@ -154,7 +148,7 @@ local function scoreitem(pn, index, scoreIndex, drawindex)
 		UIElements.QuadButton(1, 1) .. {
 			Name = "mouseOver",
 			InitCommand = function(self)
-				self:xy(framex - 220, framey + (drawindex * spacing) - 4):zoomto(frameWidth*2, 30):halign(0):valign(0):diffuse(
+				self:xy(framex, framey + (drawindex * spacing) - 4):zoomto(frameWidth*2, 30):halign(0):valign(0):diffuse(
 					getMainColor("highlight")
 				):diffusealpha(0)
 			end,
@@ -204,7 +198,7 @@ local function scoreitem(pn, index, scoreIndex, drawindex)
 		--ClearType lamps
 		Def.Quad {
 			InitCommand = function(self)
-				self:xy(framex + 220, framey + (drawindex * spacing) - 4):zoomto(2, 30):halign(0):valign(0)
+				self:xy(framex, framey + (drawindex * spacing) - 4):zoomto(8, 30):halign(0):valign(0)
 			end,
 			BeginCommand = function(self)
 				if hsTable[index] == nil then return end
@@ -215,7 +209,7 @@ local function scoreitem(pn, index, scoreIndex, drawindex)
 		--rank
 		LoadFont("Common normal") .. {
 			InitCommand = function(self)
-				self:xy(framex + 230, framey + 12 + (drawindex * spacing)):zoom(0.35)
+				self:xy(framex - 8, framey + 12 + (drawindex * spacing)):zoom(0.35)
 			end,
 			HahaThisCodeINeedHelpCommand = function(self, params)
 				if params.doot == index then
@@ -329,7 +323,7 @@ local function scoreitem(pn, index, scoreIndex, drawindex)
 				if hsTable[index] == nil then return end
 				if #hsTable >= 1 and index >= 1 then
 					self:settextf(
-						"%d / %d / %d / %d / %d / %d",
+						"%d | %d | %d | %d | %d | %d",
 						hsTable[index]:GetTapNoteScore("TapNoteScore_W1"),
 						hsTable[index]:GetTapNoteScore("TapNoteScore_W2"),
 						hsTable[index]:GetTapNoteScore("TapNoteScore_W3"),

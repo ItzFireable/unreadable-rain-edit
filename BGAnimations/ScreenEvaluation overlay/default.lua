@@ -1,38 +1,15 @@
 local t = Def.ActorFrame {}
 
-
 translated_info = {
 	Title = THEME:GetString("ScreenEvaluation", "Title"),
 	Replay = THEME:GetString("ScreenEvaluation", "ReplayTitle")
-}
-
-
---Group folder name
-local frameWidth = SCREEN_CENTER_X - capWideScale(get43size(150),20)
-local frameHeight = 20
-local frameX = SCREEN_WIDTH - 20
-local frameY = 15
-
-t[#t + 1] = LoadFont("Common Large") .. {
-	InitCommand = function(self)
-		self:xy(frameX, frameY + 10):halign(1):zoom(0.35):maxwidth((frameWidth) / 0.5)
-	end,
-	BeginCommand = function(self)
-		self:queuecommand("Set"):diffuse(getMainColor("positive"))
-	end,
-	SetCommand = function(self)
-		local song = GAMESTATE:GetCurrentSong()
-		if song ~= nil then
-			self:settext(song:GetGroupName())
-		end
-	end
 }
 
 --readded this bc the gradecounter breaks if the replay results text is not present
 --thanks steffen
 t[#t + 1] = LoadFont("Common Large") .. {
 	InitCommand = function(self)
-		self:xy(30, 32):halign(0):valign(1):zoom(0.35):diffuse(getMainColor("positive"))
+		self:xy(30, 32):halign(0):valign(1):zoom(0.35):diffuse(getMainColor("positive")):diffusealpha(0)
 		self:settext("")
 	end,
 	OnCommand = function(self)
@@ -65,41 +42,27 @@ t[#t + 1] = LoadFont("Common Large") .. {
 	end,
 }
 
-local bannersizemultiplier = 1.27
-local BannerWidth = 220 * bannersizemultiplier-- 220
-local BannerHeight = 77 * bannersizemultiplier    -- 77
+--Group folder name
+local frameWidth = 280
+local frameHeight = 20
+local frameX = SCREEN_WIDTH - 5
+local frameY = 15
 
---test banner overlay
-t[#t + 1] = Def.Quad {
-	Name = "Banner",
-	OnCommand = function(self)
-		self:x(SCREEN_CENTER_X + capWideScale(get43size(280),280)):y(70):valign(0) --308
-		self:scaletoclipped(capWideScale(get43size(270), BannerWidth), capWideScale(get43size(94.5), BannerHeight)) -- 220, 77
-		self:diffuse(getMainColor("frames"))
-	end
-}
-
---test banner overlay
-t[#t + 1] = Def.Sprite {
-	Name = "Banner",
-	OnCommand = function(self)
-		self:x(SCREEN_CENTER_X + capWideScale(get43size(280),280)):y(70):valign(0) --308
-		self:scaletoclipped(capWideScale(get43size(270), BannerWidth), capWideScale(get43size(94.5), BannerHeight)) -- 220, 77
-		local bnpath = GAMESTATE:GetCurrentSong():GetBannerPath()
-		self:visible(true)
-		if not BannersEnabled() then
-			self:visible(false)
-		elseif not bnpath then
-			bnpath = THEME:GetPathG("Common", "fallback banner")
+t[#t + 1] = LoadFont("Common Large") .. {
+	InitCommand = function(self)
+		self:xy(frameX, frameY + 5):halign(1):zoom(0.4):maxwidth((frameWidth - 40) / 0.3)
+	end,
+	BeginCommand = function(self)
+		self:queuecommand("Set"):diffuse(getMainColor("positive")):diffusebottomedge(Saturation(getMainColor("highlight"), 0.2))
+	end,
+	SetCommand = function(self)
+		local song = GAMESTATE:GetCurrentSong()
+		if song ~= nil then
+			self:settext(song:GetGroupName())
 		end
-		self:LoadBackground(bnpath)
 	end
 }
 
-
-
-t[#t + 1] = LoadActor("../gradecounter")
 t[#t + 1] = LoadActor("../_cursor")
 
 return t
-

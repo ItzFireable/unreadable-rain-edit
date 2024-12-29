@@ -2,13 +2,7 @@
 local t =
 	Def.ActorFrame {
 	Name = "PlayerAvatar"
-	
 }
-
-
-
-
-
 
 local profile
 
@@ -59,15 +53,9 @@ local translated_info = {
 	LoginCanceled = THEME:GetString("GeneralInfo", "LoginCanceled"),
 	Password = THEME:GetString("GeneralInfo","Password"),
 	Username = THEME:GetString("GeneralInfo","Email"),
-	Plays = THEME:GetString("GeneralInfo", "ProfilePlays"),
-	PlaysThisSession = THEME:GetString("GeneralInfo", "PlaysThisSession"),
-	TapsHit = THEME:GetString("GeneralInfo", "ProfileTapsHit"),
-	Playtime = THEME:GetString("GeneralInfo", "ProfilePlaytime"),
 	Judge = THEME:GetString("GeneralInfo", "ProfileJudge"),
 	RefreshSongs = THEME:GetString("GeneralInfo", "DifferentialReloadTrigger"),
-	SongsLoaded = THEME:GetString("GeneralInfo", "ProfileSongsLoaded"),
 	SessionTime = THEME:GetString("GeneralInfo", "SessionTime"),
-	GroupsLoaded = THEME:GetString("GeneralInfo", "GroupsLoaded"),
 }
 
 local function UpdateTime(self)
@@ -377,7 +365,7 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - capWideScale(get43size(15),80), AvatarY + 38):halign(0.5):zoom(0.46):diffuse(nonButtonColor)
+			self:xy(SCREEN_CENTER_X - 58, AvatarY + 38):halign(0.5):zoom(0.46):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -386,7 +374,7 @@ t[#t + 1] = Def.ActorFrame {
 			self:queuecommand("Set")
 		end,
 		SetCommand = function(self)
-			local online = IsNetSMOnline() and IsSMOnlineLoggedIn() and NSMAN:IsETTP()
+			local online = IsNetSMOnline() and IsSMOnlineLoggedIn() and NSMAN:IsETTP() --what the hell happened here
 			self:y(AvatarY + 41 - (online and 18 or 0))
 			self:settextf("%s: %s", translated_info["Judge"], GetTimingDifficulty())
 		end,
@@ -540,18 +528,8 @@ t[#t + 1] = Def.ActorFrame {
 		LogOutMessageCommand = function(self)
 			self:playcommand("SequentialScoreUploadFinished")
 		end,
-	},
+	}
 }
-
---[[
-t[#t + 1] = Def.Sprite {
-	Texture=THEME:GetPathG("","amongustwerk 2x3");
-	InitCommand=function(self)
-		self:xy(SCREEN_CENTER_X,SCREEN_CENTER_Y):zoom(0.3)
-		self:effectclock("beat")
-	end
-}
-]]
 
 t[#t + 1] =
 	Def.Quad{

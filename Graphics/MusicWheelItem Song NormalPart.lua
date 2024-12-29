@@ -1,54 +1,7 @@
 local lastclick = GetTimeSinceStart()
 local requiredtimegap = 0.1
 
-
 return Def.ActorFrame {
-
-    --if you uncomment this you'll lose about 300fps
-    --[[
-        Def.Sprite {
-            InitCommand = function(self)
-                self:fadeleft(0.5)
-                self:halign(0.9)
-                self:zoomto(120,60)
-                self:x(360)
-                self:y(-2)
-                self:diffusealpha(1)
-                end,
-                SetMessageCommand = function(self,params)
-                        local song = params.Song
-                        local pack = params.Sort
-                        local focus = params.HasFocus
-                        local bnpath = nil
-                        local pkpath = nil
-            
-                        if song then
-                            bnpath = params.Song:GetBannerPath()
-                            if not bnpath then
-                                bnpath = THEME:GetPathG("Common", "fallback wheelbanner")
-                            end
-        
-                        end
-
-                        if pack then
-                            pkpath = params.Sort:GetSongGroupBannerPath()
-                            self:Load(pkpath)
-                        end
-
-
-                        self:Load(bnpath)
-                        self:zoomto(95,38)
-            
-                        if focus then
-                            self:diffusealpha(1)
-                        else
-                            self:diffusealpha(0.3)
-                        end
-                    end
-
-    },
-                    ]]
-
     UIElements.QuadButton(1, 1) .. {
 		InitCommand = function(self)
 			self:halign(0)

@@ -1,9 +1,9 @@
-local tzoom = 0.75 --this just the zoom for all the aligments n shit
+local tzoom = 0.5
 local pdh = 42 * tzoom
 local ygap = 2
 local packspaceY = pdh + ygap
 
-local numpacks = 10
+local numpacks = 15
 local offx = 5
 local width = SCREEN_WIDTH * 0.6
 local dwidth = width - offx * 2
@@ -38,7 +38,7 @@ local translated_info = {
 
 -- initialize the base pack search
 local packlist = PackList:new()
-packlist:FilterAndSearch("", {}, numpacks)
+packlist:FilterAndSearch("", {}, true, numpacks)
 
 local o = Def.ActorFrame {
 	Name = "PacklistDisplay",
@@ -63,7 +63,7 @@ local o = Def.ActorFrame {
 		self:queuecommand("PackTableRefresh")
 	end,
 	InvokePackSearchMessageCommand = function(self, params)
-		packlist:FilterAndSearch(params.name, params.tags, numpacks)
+		packlist:FilterAndSearch(params.name, params.tags, params.tagsMatchAny, numpacks)
 		self:queuecommand("Update")
 	end,
 	PackTableRefreshCommand = function(self)
@@ -89,7 +89,7 @@ local o = Def.ActorFrame {
 		InitCommand = function(self)
 			self:zoomto(width, height - headeroff)
 			self:halign(0):valign(0)
-			self:diffuse(color("#0f0f0f"))
+			self:diffuse(color("#888888"))
 		end
 	},
 	-- headers
@@ -99,14 +99,14 @@ local o = Def.ActorFrame {
 			self:xy(offx, headeroff)
 			self:zoomto(dwidth, pdh)
 			self:halign(0)
-			self:diffuse(color("#121212"))
+			self:diffuse(color("#333333"))
 		end
 	},
 	LoadFont("Common Normal") .. {
 		Name = "TotalPacks",
 		InitCommand = function(self)
 			self:xy(c1x, headeroff)
-			self:zoom(tzoom * 0.5)
+			self:zoom(tzoom)
 			self:halign(0)
 		end,
 		UpdateCommand = function(self)
@@ -116,10 +116,10 @@ local o = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "NameHeader",
 		InitCommand = function(self)
-			self:xy(c2x + capWideScale(get43size(-30),0), headeroff)
-			self:zoom(tzoom * capWideScale(get43size(0.8),1))
+			self:xy(c2x, headeroff)
+			self:zoom(tzoom)
 			self:halign(0)
-			self:settext("Pack Name")
+			self:settext(translated_info["Name"])
 		end,
 		MouseOverCommand = function(self)
 			self:diffusealpha(hoverAlpha)
@@ -137,10 +137,10 @@ local o = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "AverageDiffHeader",
 		InitCommand = function(self)
-			self:xy(c2xc3x + capWideScale(get43size(150),65), headeroff)
-			self:zoom(tzoom * capWideScale(get43size(0.9),1))
+			self:xy(c2xc3x, headeroff)
+			self:zoom(tzoom)
 			self:halign(1)
-			self:settext("MSD")
+			self:settext(translated_info["AverageDiff"])
 		end,
 		MouseOverCommand = function(self)
 			self:diffusealpha(hoverAlpha)
@@ -158,10 +158,10 @@ local o = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "SizeHeader",
 		InitCommand = function(self)
-			self:xy(c3x + capWideScale(get43size(130),70), headeroff)
-			self:zoom(tzoom * capWideScale(get43size(0.8),0.9))
+			self:xy(c3x, headeroff)
+			self:zoom(tzoom)
 			self:halign(1)
-			self:settext("Size(MB)")
+			self:settext(translated_info["Size"])
 		end,
 		MouseOverCommand = function(self)
 			self:diffusealpha(hoverAlpha)
@@ -179,8 +179,8 @@ local o = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "PlaysHeader",
 		InitCommand = function(self)
-			self:xy(c4x + capWideScale(get43size(75),30), headeroff)
-			self:zoom(tzoom * capWideScale(get43size(0.85),0.8))
+			self:xy(c4x, headeroff)
+			self:zoom(tzoom)
 			self:halign(1)
 			self:settext(translated_info["PackPlays"])
 		end,
@@ -200,8 +200,8 @@ local o = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "SongCountHeader",
 		InitCommand = function(self)
-			self:xy(c5x + capWideScale(get43size(70),20), headeroff)
-			self:zoom(tzoom * 0.75)
+			self:xy(c5x, headeroff)
+			self:zoom(tzoom)
 			self:halign(1)
 			self:settext(translated_info["SongCount"])
 		end,
@@ -273,9 +273,9 @@ local function makePackDisplay(i)
 			end,
 			DisplayCommand = function(self)
 				if installed then
-					self:diffuse(color("#313b36"))
+					self:diffuse(color("#444444CC"))
 				else
-					self:diffuse(color("#3d3d3d"))
+					self:diffuse(color("#111111CC"))
 				end
 			end
 		},
@@ -283,7 +283,7 @@ local function makePackDisplay(i)
 			Name = "PackIndex",
 			InitCommand = function(self)
 				self:x(c1x)
-				self:zoom(tzoom * 0.8)
+				self:zoom(tzoom)
 				self:halign(0)
 			end,
 			DisplayCommand = function(self)
@@ -293,16 +293,16 @@ local function makePackDisplay(i)
 		UIElements.TextToolTip(1, 1, "Common normal") .. {
 			Name = "PackName",
 			InitCommand = function(self)
-				self:x(c2x - capWideScale(get43size(40),20))
-				self:zoom(tzoom / capWideScale(get43size(2.3),1.5))
+				self:x(c2x)
+				self:zoom(tzoom)
 
 				 -- x of left aligned col 2 minus x of right aligned col 3 minus roughly how wide column 3 is plus margin
-				self:maxwidth((c2xc3x - c2x*capWideScale(get43size(-1),0.5)) / (tzoom / 1.5))
+				self:maxwidth((c2xc3x - c2x - c2x*0.8) / tzoom)
 				self:halign(0)
-				self:diffusebottomedge(Saturation(getMainColor("highlight"), 0.2))
 			end,
 			DisplayCommand = function(self)
 				self:settext(packinfo:GetName())
+				self:diffuse(bySkillRange(packinfo:GetAvgDifficulty()))
 			end,
 			MouseOverCommand = function(self)
 				self:diffusealpha(hoverAlpha)
@@ -312,7 +312,7 @@ local function makePackDisplay(i)
 			end,
 			MouseDownCommand = function(self, params)
 				if params.event == "DeviceButton_left mouse button" then
-					local urlstringyo = DLMAN:GetHomePage() .. "/packs/" .. packinfo:GetID() -- not correct value for site id, not very smart........
+					local urlstringyo = DLMAN:GetHomePage() .. "/packs/" .. packinfo:GetID() -- not correct value for site id
 					GAMESTATE:ApplyGameCommand("urlnoexit," .. urlstringyo)
 				end
 			end
@@ -320,8 +320,8 @@ local function makePackDisplay(i)
 		LoadFont("Common normal") .. {
 			Name = "PackAverageDiff",
 			InitCommand = function(self)
-				self:x(c2xc3x + capWideScale(get43size(150),60))
-				self:zoom(tzoom*0.75)
+				self:x(c2xc3x)
+				self:zoom(tzoom)
 				self:halign(1)
 			end,
 			DisplayCommand = function(self)
@@ -333,7 +333,7 @@ local function makePackDisplay(i)
 		LoadFont("Common normal") .. {
 			Name = "PackSize",
 			InitCommand = function(self)
-				self:x(c3x + capWideScale(get43size(120),55)):zoom(tzoom * 0.75):halign(1)
+				self:x(c3x):zoom(tzoom):halign(1)
 			end,
 			DisplayCommand = function(self)
 				local psize = packinfo:GetSize() / 1024 / 1024
@@ -344,35 +344,33 @@ local function makePackDisplay(i)
 		LoadFont("Common normal") .. {
 			Name = "PackPlays",
 			InitCommand = function(self)
-				self:x(c4x + capWideScale(get43size(70),20)):zoom(tzoom *0.75):halign(1)
+				self:x(c4x):zoom(tzoom):halign(1)
 			end,
 			DisplayCommand = function(self)
 				self:settextf("%d", packinfo:GetPlayCount())
-				self:diffusebottomedge(Saturation(getMainColor("positive"), 0.1))
 			end
 		},
 		LoadFont("Common normal") .. {
 			Name = "PackSongs",
 			InitCommand = function(self)
-				self:x(c5x + capWideScale(get43size(50),10)):zoom(tzoom * 0.75):halign(1)
+				self:x(c5x):zoom(tzoom):halign(1)
 			end,
 			DisplayCommand = function(self)
 				self:settextf("%d", packinfo:GetSongCount())
-				self:diffusebottomedge(Saturation(getMainColor("positive"), 0.1))
 			end
 		},
-		UIElements.SpriteButton(1, 1, THEME:GetPathG("", "packdlicon")) .. {
+		UIElements.TextToolTip(1, 1, "Common normal") .. {
 			Name = "PackDownload",
 			InitCommand = function(self)
 				self:x(c6x)
-				self:zoom(tzoom * 0.75)
+				self:zoom(tzoom)
 				self:halign(1)
 			end,
 			DisplayCommand = function(self)
 				if installed then
-					self:diffuse(color("#70ff6e"))
+					self:settext(translated_info["Installed"])
 				else
-					self:diffuse(color("#ffffff"))
+					self:settext(translated_info["Download"])
 				end
 			end,
 			MouseOverCommand = function(self)
@@ -380,13 +378,7 @@ local function makePackDisplay(i)
 				if packinfo:IsNSFW() and not installed then
 					TOOLTIP:SetText(translated_info["IsNSFW"])
 					TOOLTIP:Show()
-			    elseif not installed then
-					TOOLTIP:SetText("Download")
-					TOOLTIP:Show()
-			    elseif installed then
-				TOOLTIP:SetText("Already Installed")
-				TOOLTIP:Show()
-			    end
+				end
 			end,
 			MouseOutCommand = function(self)
 				self:diffusealpha(1)
@@ -394,7 +386,6 @@ local function makePackDisplay(i)
 			end,
 			MouseDownCommand = function(self, params)
 				if params.event == "DeviceButton_left mouse button" then
-					SOUND:PlayOnce(THEME:GetPathS("Common", "Start"))
 					if packinfo:GetSize() > 2000000000 then
 						GAMESTATE:ApplyGameCommand("urlnoexit," .. packinfo:GetURL())
 					else

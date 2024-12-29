@@ -48,7 +48,6 @@ return Def.ActorFrame {
 			if params.PermaMirror then
 				self:Load(THEME:GetPathG("", "mirror"))
 				self:zoomto(20, 20)
-				self:wag()
 				self:visible(true)
 			else
 				self:visible(false)
@@ -57,13 +56,12 @@ return Def.ActorFrame {
 	},
 	Def.Sprite {
 		InitCommand = function(self)
-			self:xy(25, -13):zoomto(4, 19):rotationz(-15)
+			self:xy(1, -15):zoomto(4, 19)
 		end,
 		SetGradeCommand = function(self, params)
 			if params.Favorited then
 				self:Load(THEME:GetPathG("", "favorite"))
-				self:zoomto(12, 12)
-				self:pulse()
+				self:zoomto(16, 16)
 				self:visible(true)
 			else
 				self:visible(false)

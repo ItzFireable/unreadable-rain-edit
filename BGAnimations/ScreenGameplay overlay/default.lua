@@ -10,15 +10,15 @@ end
 
 local t = Def.ActorFrame {}
 
-
+--tanned wife check
 if isDarkWife then
 	t[#t + 1] = LoadActor("DarkWifeJudgmentSpotting")
 else
 t[#t + 1] = LoadActor("WifeJudgmentSpotting")
 end
+
 t[#t + 1] = LoadActor("titlesplash")
 t[#t + 1] = LoadActor("leaderboard")
-
 if inReplay then
 	t[#t + 1] = LoadActor("replayscrolling")
 end

@@ -88,7 +88,7 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 --Theme text
 t[#t + 1] = LoadFont("Common Large") .. {
 	InitCommand=function(self)
-		self:xy(capWideScale(get43size(230),250),frameY-100):zoom(0.25):align(0.5,1)
+		self:xy(capWideScale(get43size(230),250),frameY-100):zoom(0.25):halign(0.5,1)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
@@ -100,20 +100,39 @@ t[#t + 1] = LoadFont("Common Large") .. {
 --Theme ver
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	InitCommand=function(self)
-		self:xy(SCREEN_LEFT + 30,SCREEN_BOTTOM - 20):zoom(0.25):align(0.5,1)
+		self:xy(SCREEN_LEFT,SCREEN_BOTTOM - 23):zoom(0.25):halign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
 	OnCommand=function(self)
-		self:settext("Ver. 1.67")
+		self:settext("Unredable Rain 1.68")
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
-			local tag = "urlnoexit,https://github.com/ifwas/reimuboobs-theme"
+			local tag = "urlnoexit,https://github.com/ifwas/unreadable-rain"
 			GAMESTATE:ApplyGameCommand(tag)
 		end
 	end
 }
+
+--Etterna ver
+t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
+	InitCommand=function(self)
+		self:xy(SCREEN_LEFT,SCREEN_BOTTOM - 35):zoom(0.25):halign(0)
+		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
+		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
+	end,
+	OnCommand=function(self)
+		self:settext(GAMESTATE:GetEtternaVersion())
+	end,
+	MouseDownCommand = function(self, params)
+		if params.event == "DeviceButton_left mouse button" then
+			local tag = "urlnoexit,https://github.com/etternagame/etterna/releases/tag/v" .. GAMESTATE:GetEtternaVersion()
+			GAMESTATE:ApplyGameCommand(tag)
+		end
+	end
+}
+
 
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	Name = "GeometryDashButton",
