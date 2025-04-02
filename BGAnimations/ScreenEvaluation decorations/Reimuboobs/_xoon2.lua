@@ -1,4 +1,5 @@
 -- Old avatar actor frame.. renamed since much more will be placed here (hopefully?)
+-- dupe of playerinfo cus lalala shit breaks
 local t =
 	Def.ActorFrame {
 	Name = "PlayerAvatar"
@@ -11,8 +12,9 @@ local playCount = 0
 local playTime = 0
 local noteCount = 0
 local numfaves = 0
-local AvatarX = 0
-local AvatarY = SCREEN_HEIGHT - 50
+local AvatarX = 43
+local AvatarY = SCREEN_CENTER_Y - 20
+local thingY = SCREEN_HEIGHT - 50
 local playerRating = 0
 local uploadbarwidth = 100
 local uploadbarheight = 10
@@ -53,8 +55,13 @@ local translated_info = {
 	LoginCanceled = THEME:GetString("GeneralInfo", "LoginCanceled"),
 	Password = THEME:GetString("GeneralInfo","Password"),
 	Username = THEME:GetString("GeneralInfo","Email"),
+	Plays = THEME:GetString("GeneralInfo", "ProfilePlays"),
+	PlaysThisSession = THEME:GetString("GeneralInfo", "PlaysThisSession"),
+	TapsHit = THEME:GetString("GeneralInfo", "ProfileTapsHit"),
+	Playtime = THEME:GetString("GeneralInfo", "ProfilePlaytime"),
 	Judge = THEME:GetString("GeneralInfo", "ProfileJudge"),
 	RefreshSongs = THEME:GetString("GeneralInfo", "DifferentialReloadTrigger"),
+	SongsLoaded = THEME:GetString("GeneralInfo", "ProfileSongsLoaded"),
 	SessionTime = THEME:GetString("GeneralInfo", "SessionTime"),
 }
 
@@ -179,6 +186,14 @@ t[#t + 1] = Def.ActorFrame {
 			self:visible(true)
 		end
 	end,
+	Def.Quad {
+		Name = "BGDisplay",
+		InitCommand = function(self)
+			self:xy(AvatarX, AvatarY + 15):halign(0):valign(0)
+			self:zoomto(404, 49)
+			self:diffuse(getMainColor("frames")):diffusealpha(0.6)
+		end
+	},
 	UIElements.SpriteButton(1, 1, nil) .. {
 		Name = "Image",
 		InitCommand = function(self)
@@ -203,9 +218,9 @@ t[#t + 1] = Def.ActorFrame {
 		Name = "Name",
 		InitCommand = function(self)
 			self:halign(0)
-			self:xy(AvatarX + 54, AvatarY + 8)
-			self:zoom(0.55)
-			self:maxwidth(capWideScale(360,500))
+			self:xy(AvatarX + 54, AvatarY + 25) --54
+			self:zoom(0.5)
+			self:maxwidth(capWideScale(260,400))
 			self:maxheight(22)
 			self:diffuse(ButtonColor)
 		end,
@@ -235,10 +250,34 @@ t[#t + 1] = Def.ActorFrame {
 			highlightIfOver(self)
 		end,
 	},
+	LoadFont("Common Normal") .. {
+		Name = "ModString",
+		InitCommand = function(self)
+			self:xy(AvatarX + 2.4, AvatarY + 57)
+			self:zoom(0.40)
+			self:halign(0)
+			self:maxwidth(1000)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			local mstring = GAMESTATE:GetPlayerState():GetPlayerOptionsString("ModsLevel_Current")
+			local ss = SCREENMAN:GetTopScreen():GetStageStats()
+			if not ss:GetLivePlay() then
+				mstring = SCREENMAN:GetTopScreen():GetReplayModifiers()
+			end
+			self:settext(getModifierTranslations(mstring))
+		end,
+		ScoreChangedMessageCommand = function(self)
+			local mstring = SCREENMAN:GetTopScreen():GetReplayModifiers()
+			self:settext(getModifierTranslations(mstring))
+		end,
+	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "loginlogout",
 		InitCommand = function(self)
-			self:xy(AvatarX + capWideScale(get43size(120),120), SCREEN_BOTTOM - 9):halign(0.5):zoom(0.45):diffuse(ButtonColor)
+			self:xy(AvatarX + 120, SCREEN_BOTTOM - 27):halign(0.5):zoom(0.5):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -315,8 +354,8 @@ t[#t + 1] = Def.ActorFrame {
 		Name = "LoggedInAs",
 		InitCommand = function(self)
 			self:halign(0)
-			self:xy(AvatarX + 54, AvatarY + 23)
-			self:zoom(0.55)
+			self:xy(AvatarX + 54, AvatarY + 40)
+			self:zoom(0.5)
 			self:maxwidth(capWideScale(360,800))
 			self:maxheight(22)
 			self:diffuse(ButtonColor)
@@ -349,7 +388,8 @@ t[#t + 1] = Def.ActorFrame {
 		end,
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" then
-				DLMAN:ShowUserPage(DLMAN:GetUsername())
+				local userpage = "urlnoexit," .. DLMAN:GetHomePage() .. "/users/" .. DLMAN:GetUsername()
+				GAMESTATE:ApplyGameCommand(userpage)
 			end
 		end,
 		OnlineUpdateMessageCommand = function(self)
@@ -362,99 +402,12 @@ t[#t + 1] = Def.ActorFrame {
 			highlightIfOver(self)
 		end,
 	},
-	UIElements.TextToolTip(1, 1, "Common Normal") .. {
-		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - 58, AvatarY + 38):halign(0.5):zoom(0.46):diffuse(ButtonColor)
-		end,
-		BeginCommand = function(self)
-			self:queuecommand("Set")
-		end,
-		OptionsScreenClosedMessageCommand = function(self)
-			self:queuecommand("Set")
-		end,
-		SetCommand = function(self)
-			local online = IsNetSMOnline() and IsSMOnlineLoggedIn() and NSMAN:IsETTP() --what the hell happened here
-			self:y(AvatarY + 41 - (online and 18 or 0))
-			self:settextf("%s: %s", translated_info["Judge"], GetTimingDifficulty())
-		end,
-		MouseOverCommand = function(self)
-			highlightIfOver(self)
-		end,
-		MouseOutCommand = function(self)
-			highlightIfOver(self)
-		end,
-		MouseDownCommand = function(self, params)
-			if params.event == "DeviceButton_left mouse button" then
-				-- raise judge
-				local cur_judge = GetTimingDifficulty()
-				if (cur_judge < 9) then
-					local scale = ms.JudgeScalers[cur_judge+1]
-					SetTimingDifficulty(scale)
-					self:queuecommand("Set")
-				end
-			end
-			if params.event == "DeviceButton_right mouse button" then
-				-- lower judge
-				local cur_judge = GetTimingDifficulty()
-				if (cur_judge > 4) then
-					local scale = ms.JudgeScalers[cur_judge-1]
-					SetTimingDifficulty(scale)
-					self:queuecommand("Set")
-				end
-			end
-		end
-	},
-	UIElements.TextToolTip(1, 1, "Common Normal") .. {
-		Name = "Version",
-		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, AvatarY + 8):halign(1):zoom(0.42):diffuse(ButtonColor)
-		end,
-		BeginCommand = function(self)
-			self:queuecommand("Set")
-		end,
-		SetCommand = function(self)
-			self:settext(GAMESTATE:GetEtternaVersion())
-		end,
-		MouseOverCommand = function(self)
-			highlightIfOver(self)
-		end,
-		MouseOutCommand = function(self)
-			highlightIfOver(self)
-		end,
-		MouseDownCommand = function(self, params)
-			if params.event == "DeviceButton_left mouse button" then
-				DLMAN:ShowProjectReleases()
-			end
-		end
-	},
-	UIElements.TextToolTip(1, 1, "Common Normal") .. {
-		Name = "refreshbutton",
-		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, AvatarY + 19):halign(1):zoom(0.35):diffuse(ButtonColor)
-		end,
-		BeginCommand = function(self)
-			self:queuecommand("Set")
-		end,
-		SetCommand = function(self)
-			self:settextf(translated_info["RefreshSongs"])
-		end,
-		MouseOverCommand = function(self)
-			highlightIfOver(self)
-		end,
-		MouseOutCommand = function(self)
-			highlightIfOver(self)
-		end,
-		MouseDownCommand = function(self, params)
-			if params.event == "DeviceButton_left mouse button" then
-				SONGMAN:DifferentialReload()
-			end
-		end
-	},
+
 	-- ok coulda done this as a separate object to avoid copy paste but w.e
 	-- upload progress bar bg
 	UIElements.QuadButton(1,1) .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH * 2/3, AvatarY + 41):zoomto(uploadbarwidth, uploadbarheight)
+			self:xy(SCREEN_WIDTH * 2/3, thingY + 41):zoomto(uploadbarwidth, uploadbarheight)
 			self:diffuse(color("#111111")):diffusealpha(0):halign(0)
 		end,
 		UploadProgressMessageCommand = function(self, params)
@@ -490,7 +443,7 @@ t[#t + 1] = Def.ActorFrame {
 	-- fill bar
 	Def.Quad {
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH * 2/3, AvatarY + 41):zoomto(0, uploadbarheight)
+			self:xy(SCREEN_WIDTH * 2/3, thingY + 41):zoomto(0, uploadbarheight)
 			self:diffuse(color("#AAAAAAA")):diffusealpha(0):halign(0)
 		end,
 		UploadProgressMessageCommand = function(self, params)
@@ -510,7 +463,7 @@ t[#t + 1] = Def.ActorFrame {
 	-- super required explanatory text
 	LoadFont("Common Normal") .. {
 	    InitCommand = function(self)
-			self:xy(SCREEN_WIDTH * 2/3, AvatarY + 27):halign(0):valign(0)
+			self:xy(SCREEN_WIDTH * 2/3, thingY + 27):halign(0):valign(0)
 			self:diffuse(nonButtonColor):diffusealpha(0):zoom(0.35)
         	self:settext("Uploading Scores...")
 		end,
@@ -529,30 +482,36 @@ t[#t + 1] = Def.ActorFrame {
 	}
 }
 
-t[#t + 1] =
-	Def.Quad{
-		InitCommand=function(self)
-			self:xy(SCREEN_CENTER_X + capWideScale(get43size(270), 270),SCREEN_TOP + 30)
-			self:scaletoclipped(capWideScale(get43size(384), 384), capWideScale(get43size(120), 120)):diffuse(getMainColor("frames")):diffusealpha(0.65)
-			self:fadebottom(0.5)
-		end,
-	}
-
 t[#t + 1] = Def.ActorFrame {
 	InitCommand = function(self)
 		self:SetUpdateFunction(UpdateTime)
 	end,
+	Def.Quad {
+		InitCommand = function(self)
+			self:xy(SCREEN_RIGHT - 43, SCREEN_HEIGHT - 6)
+			self:zoomto(150,25)
+			self:diffuse(getMainColor("frames")):diffusealpha(0.8)
+		end
+	},
+	Def.Quad {
+		InitCommand = function(self)
+			self:xy(SCREEN_LEFT + 80, SCREEN_HEIGHT - 6)
+			self:zoomto(180,25)
+			self:diffuse(getMainColor("frames")):diffusealpha(0.8)
+		end
+	},
 	LoadFont("Common Normal") .. {
 		Name = "CurrentTime",
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, SCREEN_BOTTOM - 3.5):halign(1):valign(1):zoom(0.45)
+			self:xy(SCREEN_RIGHT, SCREEN_HEIGHT - 6):halign(1):valign(1):zoom(0.45)
 		end
 	},
 
 	LoadFont("Common Normal") .. {
 		Name = "SessionTime",
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - capWideScale(get43size(150),180), SCREEN_BOTTOM - 5):halign(0.5):valign(1):zoom(0.45)
+			self:xy(SCREEN_LEFT + 2, SCREEN_HEIGHT - 6):halign(0):valign(1):zoom(0.45)
+			--(AvatarX + 53, AvatarY - 419):halign(0.5):valign(1):zoom(0.3)
 		end
 	}
 }

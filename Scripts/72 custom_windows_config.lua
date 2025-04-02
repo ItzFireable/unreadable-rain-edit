@@ -83,8 +83,9 @@ local defaultConfig = {
 	]]
 	customWindowConfigs = {
 
+		
 		osumaniaOD8 = {
-			displayName = "osu!mania OD8",
+			displayName = "o!m OD8",
 			customWindowNames = {
 				W1 = "300g",
 				W2 = "300",
@@ -121,11 +122,11 @@ local defaultConfig = {
 				Lift = 3,
 				Mine = 0,
 			},
-			judgeByOldestNote = false,
+			judgeByOldestNote = true,
 		},
 
 		osumaniaOD85 = {
-			displayName = "osu!mania OD8.5",
+			displayName = "o!m OD8.5",
 			customWindowNames = {
 				W1 = "300g",
 				W2 = "300",
@@ -162,11 +163,11 @@ local defaultConfig = {
 				Lift = 3,
 				Mine = 0,
 			},
-			judgeByOldestNote = false,
+			judgeByOldestNote = true,
 		},
 
 		osumaniaOD9 = {
-			displayName = "osu!mania OD9",
+			displayName = "o!m OD9",
 			customWindowNames = {
 				W1 = "300g",
 				W2 = "300",
@@ -203,8 +204,8 @@ local defaultConfig = {
 				Lift = 3,
 				Mine = 0,
 			},
-			judgeByOldestNote = false,
-		},
+			judgeByOldestNote = true,
+		}
 
 	},
 }

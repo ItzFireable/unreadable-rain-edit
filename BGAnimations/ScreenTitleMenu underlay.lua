@@ -100,17 +100,15 @@ t[#t + 1] = LoadFont("Common Large") .. {
 --Theme ver
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	InitCommand=function(self)
-		self:xy(SCREEN_LEFT,SCREEN_BOTTOM - 23):zoom(0.25):halign(0)
+		self:xy(SCREEN_LEFT + 1,SCREEN_BOTTOM - 23):zoom(0.25):halign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
 	OnCommand=function(self)
-		self:settext("Unredable Rain 1.68")
+		self:settext("Unredable Rain 1.70")
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
-			local tag = "urlnoexit,https://github.com/ifwas/unreadable-rain"
-			GAMESTATE:ApplyGameCommand(tag)
 		end
 	end
 }
@@ -127,27 +125,28 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
-			local tag = "urlnoexit,https://github.com/etternagame/etterna/releases/tag/v" .. GAMESTATE:GetEtternaVersion()
-			GAMESTATE:ApplyGameCommand(tag)
+			DLMAN:ShowProjectReleases()
 		end
 	end
 }
 
 
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	Name = "GeometryDashButton",
+	Name = "geometrydash",
 	InitCommand=function(self)
-		self:xy(SCREEN_LEFT + 65,SCREEN_BOTTOM - 15):zoom(0.25):valign(0)
+		self:xy(SCREEN_LEFT + 1,SCREEN_BOTTOM - 15):zoom(0.25):halign(0):valign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
 	BeginCommand = function(self)
-		self:settext("launch geometry dash")
+		self:settext("Check out more themes on Martzi's repo")
+
+		packinfo = packlist:GetPacks()[i]
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
-        GAMESTATE:ApplyGameCommand("urlnoexit,steam://rungameid/322170")
-		ms.ok("Launching Geometry Dash...")
+			Arch.setClipboardText("https://sectofmysticwisdom.com/etternathemerepo") --prob doesn't work on linux 
+			ms.ok("Link Copied Succesfully!")
 		end
 	end
 }
@@ -212,14 +211,15 @@ local _, count = string.gsub(scrollerChoices, "%,", "")
 local choices = mysplit(scrollerChoices, ",")
 local choiceCount = count + 1
 local i
+
 for i = 1, choiceCount do
 	t[#t + 1] = UIElements.QuadButton(1, 1) .. {
 		OnCommand = function(self)
-			self:xy(scrollerX + 10, scrollerY):zoomto(270, 16)
+			self:xy(scrollerX, scrollerY):zoomto(50, 16)
 			transformF(self, 0, i, choiceCount)
-			self:addx(SCREEN_CENTER_X - 20)
-			self:addy(SCREEN_CENTER_Y - 20)
 			self:diffusealpha(0)
+			self:addx(90)
+			self:addy(-70)
 		end,
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" then

@@ -53,9 +53,15 @@ local translated_info = {
 	LoginCanceled = THEME:GetString("GeneralInfo", "LoginCanceled"),
 	Password = THEME:GetString("GeneralInfo","Password"),
 	Username = THEME:GetString("GeneralInfo","Email"),
+	Plays = THEME:GetString("GeneralInfo", "ProfilePlays"),
+	PlaysThisSession = THEME:GetString("GeneralInfo", "PlaysThisSession"),
+	TapsHit = THEME:GetString("GeneralInfo", "ProfileTapsHit"),
+	Playtime = THEME:GetString("GeneralInfo", "ProfilePlaytime"),
 	Judge = THEME:GetString("GeneralInfo", "ProfileJudge"),
 	RefreshSongs = THEME:GetString("GeneralInfo", "DifferentialReloadTrigger"),
+	SongsLoaded = THEME:GetString("GeneralInfo", "ProfileSongsLoaded"),
 	SessionTime = THEME:GetString("GeneralInfo", "SessionTime"),
+	GroupsLoaded = THEME:GetString("GeneralInfo", "GroupsLoaded"),
 }
 
 local function UpdateTime(self)
@@ -238,7 +244,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "loginlogout",
 		InitCommand = function(self)
-			self:xy(AvatarX + capWideScale(get43size(120),120), SCREEN_BOTTOM - 9):halign(0.5):zoom(0.45):diffuse(ButtonColor)
+			self:xy(SCREEN_CENTER_X, AvatarY + 8):halign(0.5):zoom(0.45):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -314,12 +320,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "LoggedInAs",
 		InitCommand = function(self)
-			self:halign(0)
-			self:xy(AvatarX + 54, AvatarY + 23)
-			self:zoom(0.55)
-			self:maxwidth(capWideScale(360,800))
-			self:maxheight(22)
-			self:diffuse(ButtonColor)
+			self:xy(SCREEN_CENTER_X, AvatarY + 23.5):halign(0.5):zoom(0.45):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -364,7 +365,52 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - 58, AvatarY + 38):halign(0.5):zoom(0.46):diffuse(ButtonColor)
+			self:xy(AvatarX + 54, AvatarY + 21):halign(0):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s %s", playCount, translated_info["Plays"])
+		end,
+		MouseOverCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:SetText(SCOREMAN:GetNumScoresThisSession() .. " " .. translated_info["PlaysThisSession"])
+			TOOLTIP:Show()
+		end,
+		MouseOutCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:Hide()
+		end,
+	},
+	LoadFont("Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(AvatarX + 54, AvatarY + 31.5):halign(0):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			local time = SecondsToHHMMSS(playTime)
+			self:settextf("%s %s", time, translated_info["Playtime"])
+		end
+	},
+	LoadFont("Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(AvatarX + 54, AvatarY + 42):halign(0):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s %s", noteCount, translated_info["TapsHit"])
+		end
+	},
+	UIElements.TextToolTip(1, 1, "Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(SCREEN_CENTER_X - capWideScale(125,175), AvatarY + 41):halign(0.5):zoom(0.4):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -373,7 +419,7 @@ t[#t + 1] = Def.ActorFrame {
 			self:queuecommand("Set")
 		end,
 		SetCommand = function(self)
-			local online = IsNetSMOnline() and IsSMOnlineLoggedIn() and NSMAN:IsETTP() --what the hell happened here
+			local online = IsNetSMOnline() and IsSMOnlineLoggedIn() and NSMAN:IsETTP()
 			self:y(AvatarY + 41 - (online and 18 or 0))
 			self:settextf("%s: %s", translated_info["Judge"], GetTimingDifficulty())
 		end,
@@ -449,6 +495,31 @@ t[#t + 1] = Def.ActorFrame {
 				SONGMAN:DifferentialReload()
 			end
 		end
+	},
+	UIElements.TextToolTip(1, 1, "Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(SCREEN_WIDTH - 3, AvatarY + 30):halign(1):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s: %i", translated_info["SongsLoaded"], SONGMAN:GetNumSongs())
+		end,
+		DFRFinishedMessageCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		MouseOverCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:SetText(SONGMAN:GetNumSongGroups() .. " " .. translated_info["GroupsLoaded"])
+			TOOLTIP:Show()
+		end,
+		MouseOutCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:Hide()
+		end,
 	},
 	-- ok coulda done this as a separate object to avoid copy paste but w.e
 	-- upload progress bar bg
@@ -529,15 +600,6 @@ t[#t + 1] = Def.ActorFrame {
 	}
 }
 
-t[#t + 1] =
-	Def.Quad{
-		InitCommand=function(self)
-			self:xy(SCREEN_CENTER_X + capWideScale(get43size(270), 270),SCREEN_TOP + 30)
-			self:scaletoclipped(capWideScale(get43size(384), 384), capWideScale(get43size(120), 120)):diffuse(getMainColor("frames")):diffusealpha(0.65)
-			self:fadebottom(0.5)
-		end,
-	}
-
 t[#t + 1] = Def.ActorFrame {
 	InitCommand = function(self)
 		self:SetUpdateFunction(UpdateTime)
@@ -552,7 +614,7 @@ t[#t + 1] = Def.ActorFrame {
 	LoadFont("Common Normal") .. {
 		Name = "SessionTime",
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - capWideScale(get43size(150),180), SCREEN_BOTTOM - 5):halign(0.5):valign(1):zoom(0.45)
+			self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM - 5):halign(0.5):valign(1):zoom(0.45)
 		end
 	}
 }

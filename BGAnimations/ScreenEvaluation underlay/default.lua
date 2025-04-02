@@ -1,5 +1,6 @@
-local t = Def.ActorFrame {}
 local choiceStyle = themeConfig:get_data().global.ResultScreenStyle
+
+local t = Def.ActorFrame {}
 
 if choiceStyle == 1 then
     t[#t+1] = LoadActor("Unredable/default")

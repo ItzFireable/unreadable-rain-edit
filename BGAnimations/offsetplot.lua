@@ -1,5 +1,5 @@
 -- updated to handle both immediate evaluation when pulling data from pss (doesnt require invoking calls to loadreplay data) and scoretab plot construction (does) -mina
-
+local ResultScreenStyle = themeConfig:get_data().global.ResultScreenStyle
 local judges = {"marv", "perf", "great", "good", "boo", "miss"}
 local tst = ms.JudgeScalers
 local judge = GetTimingDifficulty()
@@ -7,6 +7,11 @@ local tso = tst[judge]
 
 local plotWidth, plotHeight = 400, 120
 local plotX, plotY = SCREEN_WIDTH - 5 - plotWidth / 2, SCREEN_HEIGHT - 59.5 - plotHeight / 2
+
+if ResultScreenStyle == 2 then
+	plotX, plotY = 450 - 5 - plotWidth / 2, 500 - 59.5 - plotHeight / 2
+end
+
 local dotDims, plotMargin = 2, 4
 local maxOffset = math.max(180, 180 * tso)
 local baralpha = 0.2
