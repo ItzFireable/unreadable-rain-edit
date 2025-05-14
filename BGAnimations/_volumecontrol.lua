@@ -1,6 +1,10 @@
 --todo: make mouse inputs actually work
 
-local t = Def.ActorFrame {}
+local t = Def.ActorFrame {
+    OffCommand = function(self)
+        self:RemoveAllChildren()
+    end
+}
 
 local EventVolumeControl = false
 local bgThingX = SCREEN_CENTER_X + 270
@@ -88,10 +92,6 @@ t[#t + 1] = UIElements.QuadButton(-2000, 1) .. {
         self:xy(0,0)
         self:zoomto(1,1)
         self:visible(false)
-    end,
-    EnteringSongMessageCommand = function(self)
-        self:visible(true)
-        SCREENMAN:GetTopScreen():AddInputCallback(volControlBindOff)
     end
 }
 

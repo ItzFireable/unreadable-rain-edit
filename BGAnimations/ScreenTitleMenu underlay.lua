@@ -8,20 +8,23 @@ local t = Def.ActorFrame {}
 local frameX = THEME:GetMetric("ScreenTitleMenu", "ScrollerX") - 10
 local frameY = THEME:GetMetric("ScreenTitleMenu", "ScrollerY")
 
+t[#t + 1] = LoadActor("_xoon3")
 
 
 
 t[#t + 1] =
 	Def.Sprite{
-		Texture=THEME:GetPathG("","titlebg");
+		Texture=THEME:GetPathG("","BackgroundTitle/titlebg");
 		InitCommand=function(self)
 			self:xy(SCREEN_CENTER_X,SCREEN_CENTER_Y):zoom(0.4)
 			self:scaletocover(0, 0, SCREEN_WIDTH, SCREEN_BOTTOM)
-			self:diffusealpha(0.4)
+			self:diffusealpha(0.5)
 		end
 	}
 
 
+
+	
 local playingMusic = {}
 local playingMusicCounter = 1
 --Title text
@@ -105,7 +108,7 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
 	OnCommand=function(self)
-		self:settext("Unredable Rain 1.70")
+		self:settext("Unredable Rain 1.70.5")
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
