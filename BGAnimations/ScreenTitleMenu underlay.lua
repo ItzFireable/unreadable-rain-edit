@@ -4,27 +4,6 @@ end
 
 local t = Def.ActorFrame {}
 
---thing made by dashdash, what a surprise, unredable rain now has actual rain
-local rain = function(angle, intensity)
-    local speed = 1 - math.min(intensity, 800) / 2500
-    local t = Def.ActorFrame {}
-    for i = 1, math.min(300, intensity) do
-        t[#t+1] = Def.Quad {
-            InitCommand = function(self)
-                self:queuecommand("Regen")
-            end,
-            RegenCommand = function(self)
-                local where = math.random(-math.abs(angle) * 20,SCREEN_WIDTH + math.abs(angle) * 20)
-                self:sleep(math.random(intensity) / intensity):rotationz(90 + angle):zoomto(intensity / 4,0.6):xy(where,-500):diffuse(Saturation(getMainColor("highlight"), 0.2)):diffusealpha(0.5)
-                self:linear(speed):xy(where - (angle * 30), SCREEN_HEIGHT + 500):queuecommand("Regen")
-            end
-        }
-    end
-    return t
-end
-
-t[#t+1] = rain(10, 300)
-
 local frameX = THEME:GetMetric("ScreenTitleMenu", "ScrollerX") - 10
 local frameY = THEME:GetMetric("ScreenTitleMenu", "ScrollerY")
 
