@@ -36,7 +36,8 @@ end
 t[#t + 1] = Def.Quad {
 	InitCommand = function(self)
 		self:xy(SCREEN_WIDTH, 0):halign(1):valign(0):zoomto(capWideScale(get43size(350), 350), SCREEN_HEIGHT)
-		self:diffuse(0.1,0.1,0.1,0.1)
+		self:fadetop(0.5):fadeleft(0.5)
+		self:diffuse(0.1,0.1,0.1,0.4)
 	end
 }
 

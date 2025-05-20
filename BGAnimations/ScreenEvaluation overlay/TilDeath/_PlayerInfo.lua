@@ -5,7 +5,7 @@ local t =
 }
 
 local profile
-local hoverAlpha = 0.6
+
 local profileName = THEME:GetString("GeneralInfo", "NoProfile")
 local playCount = 0
 local playTime = 0
@@ -244,7 +244,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "loginlogout",
 		InitCommand = function(self)
-			self:xy(AvatarX + 55, SCREEN_BOTTOM - 10):halign(0):zoom(0.45):diffuse(ButtonColor)
+			self:xy(SCREEN_CENTER_X, AvatarY + 8):halign(0.5):zoom(0.45):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -320,7 +320,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "LoggedInAs",
 		InitCommand = function(self)
-			self:xy(AvatarX + 55, AvatarY + 24):halign(0):zoom(0.5):diffuse(ButtonColor)
+			self:xy(SCREEN_CENTER_X, AvatarY + 23.5):halign(0.5):zoom(0.45):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -365,7 +365,52 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - capWideScale(125,75), AvatarY + 41):halign(0.5):zoom(0.4):diffuse(ButtonColor)
+			self:xy(AvatarX + 54, AvatarY + 21):halign(0):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s %s", playCount, translated_info["Plays"])
+		end,
+		MouseOverCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:SetText(SCOREMAN:GetNumScoresThisSession() .. " " .. translated_info["PlaysThisSession"])
+			TOOLTIP:Show()
+		end,
+		MouseOutCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:Hide()
+		end,
+	},
+	LoadFont("Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(AvatarX + 54, AvatarY + 31.5):halign(0):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			local time = SecondsToHHMMSS(playTime)
+			self:settextf("%s %s", time, translated_info["Playtime"])
+		end
+	},
+	LoadFont("Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(AvatarX + 54, AvatarY + 42):halign(0):zoom(0.35):diffuse(nonButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s %s", noteCount, translated_info["TapsHit"])
+		end
+	},
+	UIElements.TextToolTip(1, 1, "Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(SCREEN_CENTER_X - capWideScale(125,175), AvatarY + 41):halign(0.5):zoom(0.4):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -453,37 +498,28 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, AvatarY + 30):halign(1):zoom(0.41):diffuse(nonButtonColor)
-			self:settext("Random Song")
+			self:xy(SCREEN_WIDTH - 3, AvatarY + 30):halign(1):zoom(0.35):diffuse(nonButtonColor)
 		end,
-    MouseOverCommand = function(self)
-		self:diffusealpha(hoverAlpha)
-	end,
-	MouseOutCommand = function(self)
-		self:diffusealpha(1)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			local w = SCREENMAN:GetTopScreen():GetMusicWheel()
-
-			if INPUTFILTER:IsShiftPressed() and self.lastlastrandom ~= nil then
-
-				-- if the last random song wasnt filtered out, we can select it
-				-- so end early after jumping to it
-				if w:SelectSong(self.lastlastrandom) then
-					return
-				end
-				-- otherwise, just pick a new random song
-			end
-
-			local t = w:GetSongs()
-			if #t == 0 then return end
-			local random_song = t[math.random(#t)]
-			w:SelectSong(random_song)
-			self.lastlastrandom = self.lastrandom
-			self.lastrandom = random_song
-		end
-	end
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s: %i", translated_info["SongsLoaded"], SONGMAN:GetNumSongs())
+		end,
+		DFRFinishedMessageCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		MouseOverCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:SetText(SONGMAN:GetNumSongGroups() .. " " .. translated_info["GroupsLoaded"])
+			TOOLTIP:Show()
+		end,
+		MouseOutCommand = function(self)
+			highlightIfOver(self)
+			if not self:IsVisible() then return end
+			TOOLTIP:Hide()
+		end,
 	},
 	-- ok coulda done this as a separate object to avoid copy paste but w.e
 	-- upload progress bar bg
@@ -578,7 +614,7 @@ t[#t + 1] = Def.ActorFrame {
 	LoadFont("Common Normal") .. {
 		Name = "SessionTime",
 		InitCommand = function(self)
-			self:xy(AvatarX + 155, SCREEN_BOTTOM - 5):halign(0):valign(1):zoom(0.45)
+			self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM - 5):halign(0.5):valign(1):zoom(0.45)
 		end
 	}
 }

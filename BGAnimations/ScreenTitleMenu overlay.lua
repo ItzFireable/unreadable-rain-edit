@@ -33,7 +33,5 @@ if showVisualizer then
 
 t[#t + 1] = LoadActor("_volumecontrol")
 t[#t+1] = LoadActor(THEME:GetPathG("", "_crashUploadOptIn"))
-
---t[#t + 1] = LoadActor("_xoon3")
 t[#t + 1] = LoadActor("_cursor")
 return t

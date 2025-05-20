@@ -7,7 +7,6 @@ local frameWidth = 280
 local frameHeight = 20
 local frameX = SCREEN_WIDTH - 5
 local frameY = 15
-
 local sortTable = {
 	SortOrder_Group = THEME:GetString("SortOrder", "Group"),
 	SortOrder_Title = THEME:GetString("SortOrder", "Title"),
@@ -56,6 +55,7 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 			self:settextf("%s: %s", translated_info["Sort"], sortTable[sort])
 			group_rand = ""
 		end
+
 	end,
 	SortOrderChangedMessageCommand = function(self)
 		self:queuecommand("Set"):diffuse(getMainColor("positive")):diffusebottomedge(Saturation(getMainColor("highlight"), 0.2))

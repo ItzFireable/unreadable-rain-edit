@@ -49,10 +49,10 @@ t[#t + 1] = LoadActor("../_PlayerInfo")
 
 if showVisualizer then
 	local vis = audioVisualizer:new {
-		x = capWideScale(get43size(450),420),
+		x = 425,
 		y = SCREEN_BOTTOM,
-		maxHeight = 30,
-		freqIntervals = audioVisualizer.multiplyIntervals(audioVisualizer.defaultIntervals, 7),
+		maxHeight = 34,
+		freqIntervals = audioVisualizer.multiplyIntervals(audioVisualizer.defaultIntervals, 8),
 		color = getMainColor("positive"),
 		onBarUpdate = function(self)
 			--[
@@ -71,46 +71,8 @@ if showVisualizer then
 end
 
 
-t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	Name="rando",
-	InitCommand = function(self)
-		self:xy(capWideScale(get43size(735),790), SCREEN_BOTTOM - 17):halign(0):valign(1):zoom(0.2):diffuse(getMainColor("positive"))
-		self:settextf("Random Song")
-	end,
-	MouseOverCommand = function(self)
-		self:diffusealpha(hoverAlpha)
-	end,
-	MouseOutCommand = function(self)
-		self:diffusealpha(1)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			local w = SCREENMAN:GetTopScreen():GetMusicWheel()
-
-			if INPUTFILTER:IsShiftPressed() and self.lastlastrandom ~= nil then
-
-				-- if the last random song wasnt filtered out, we can select it
-				-- so end early after jumping to it
-				if w:SelectSong(self.lastlastrandom) then
-					return
-				end
-				-- otherwise, just pick a new random song
-			end
-
-			local t = w:GetSongs()
-			if #t == 0 then return end
-			local random_song = t[math.random(#t)]
-			w:SelectSong(random_song)
-			self.lastlastrandom = self.lastrandom
-			self.lastrandom = random_song
-		end
-	end,
-	KBRandomSongMessageComand = function(self)
-	end
-}
-
-t[#t + 1] = LoadActor("../_volumecontrol")
 t[#t + 1] = LoadActor("currentsort")
+t[#t + 1] = LoadActor("../_volumecontrol")
 t[#t + 1] = LoadActor("../_cursor")
 t[#t + 1] = LoadActor("../_halppls")
 

@@ -1,9 +1,5 @@
---[[ quick TODO: make an option to make this visible in the bottom part of the frame and the ScreenEvaluation
-     but i think screenevaluation needs it's own frame to put the gradecounter and other neet stuff like 
-     online score viewer in ScreenEvaluation just like in rebirth  ]]
-
--- pls don't look at this mess -steffen
--- haha i looked at it lolol
+-- pls don't look at this mess
+-- big thank you to LegendaryHawk for helping to improve this mess <3
 
 local t = Def.ActorFrame {}
 
@@ -16,18 +12,25 @@ local xGap = 5
 local yPos = 37.5
 local yGap = 11.5
 
--- cache values so we only parse the xml once
-local basePath = PROFILEMAN:GetProfileDir(1)
-local saveFile = basePath .. "grade_counter.txt"
+-- In-memory storage for grade counts
+if GRADECOUNTERSTORAGE == nil then
+    GRADECOUNTERSTORAGE = {
+        AAAA = 0,
+        AAA = 0,
+        AA = 0,
+        A = 0,
+        initialized = false,
+        lastProfileName = ""
+    }
+end
 
 -- the visual in the lower right displaying the values
--- we don't rlly need this to be visible while still using the logic so, me being lazy i'll just make everything invisible
 local function CreateGradeDisplay(tier, index)
     return Def.ActorFrame {
         -- tier display
         LoadFont("Common Normal") .. {
             OnCommand = function(self)
-                self:xy(SCREEN_CENTER_X + SCREEN_CENTER_X / 2.5 + xPos + xGap, SCREEN_BOTTOM - yPos + yGap * index):halign(0):valign(1):zoom(fontZoom):visible(false)
+                self:xy(SCREEN_CENTER_X + SCREEN_CENTER_X / 2.5 + xPos + xGap, SCREEN_BOTTOM - yPos + yGap * index):halign(0):valign(1):zoom(fontZoom)
                 self:settext(getGradeStrings(tier) .. "")
                 self:diffuse(getGradeColor(tier))
             end
@@ -41,33 +44,12 @@ local function CreateGradeDisplay(tier, index)
                 if index == 2 then valueToDisplay = GRADECOUNTERSTORAGE.AA end
                 if index == 3 then valueToDisplay = GRADECOUNTERSTORAGE.A end
 
-                self:xy(SCREEN_CENTER_X + SCREEN_CENTER_X / 2.5 + xPos, SCREEN_BOTTOM - yPos + yGap * index):halign(1):valign(1):zoom(fontZoom):visible(false)
-				self:diffuse(fontColor)
-				self:settext(valueToDisplay)
+                self:xy(SCREEN_CENTER_X + SCREEN_CENTER_X / 2.5 + xPos, SCREEN_BOTTOM - yPos + yGap * index):halign(1):valign(1):zoom(fontZoom)
+                self:diffuse(fontColor)
+                self:settext(valueToDisplay)
             end
         }
     }
-end
-
--- write grade count into "cache file"
-local function StoreGrades(aaaa, aaa, aa, a)
-    local content = string.format("%d\n%d\n%d\n%d\n", aaaa, aaa, aa, a)
-    File.Write(saveFile, content)
-end
-
--- read grade counts from "cache file"
-local function RetrieveGrades()
-    local content = File.Read(saveFile)
-    if not content then
-        return false, 0, 0, 0, 0
-    end
-
-    local aaaa, aaa, aa, a = content:match("(%d+)%s*(%d+)%s*(%d+)%s*(%d+)")
-    if not (aaaa and aaa and aa and a) then
-        return false, 0, 0, 0, 0
-    end
-
-    return true, tonumber(aaaa), tonumber(aaa), tonumber(aa), tonumber(a)
 end
 
 -- code for parsing the xml
@@ -103,58 +85,38 @@ local function CountGrade(tiers, grades)
     return count
 end
 
--- object? dunno lua terms to store gradecounts so we don't have to read the file multiple times in CreateGradeDisplay - LoadFont - OnCommand
-if not GRADECOUNTERSTORAGE then
-    GRADECOUNTERSTORAGE={
-        AAAA = 0,
-        AAA = 0,
-        AA = 0,
-        A = 0
-    }
-end
-
--- increments and store in "cache file"
+-- increments the grade count
 function GRADECOUNTERSTORAGE:increment(grade)
     if grade == "AAAA" then self.AAAA = self.AAAA + 1 end
     if grade == "AAA" then self.AAA = self.AAA + 1 end
     if grade == "AA" then self.AA = self.AA + 1 end
     if grade == "A" then self.A = self.A + 1 end
-
-    StoreGrades(self.AAAA, self.AAA, self.AA, self.A)
 end
 
--- parse the xml if there's no cache file
--- creates the cache file and sets the values
+-- parse the xml and initialize the grade counts
+-- make sure we re-check, if we switch profiles in game
 function GRADECOUNTERSTORAGE:init()
-   
-    local success, aaaa, aaa, aa, a = RetrieveGrades()
-   
-    if not success then
-        local xmlData = File.Read(basePath .. "Etterna.xml")
+    local profile            = GetPlayerOrMachineProfile(PLAYER_1)
+    local currentProfileName = profile:GetDisplayName()
+
+    if not self.initialized or self.lastProfileName ~= currentProfileName then
+        local xmlData = File.Read(PROFILEMAN:GetProfileDir(1) .. "Etterna.xml")
         local grades = ParseXML(xmlData)
+		
+        self.AAAA = CountGrade({"Tier01", "Tier02", "Tier03", "Tier04"}, grades)
+        self.AAA = CountGrade({"Tier05", "Tier06", "Tier07"}, grades)
+        self.AA = CountGrade({"Tier08", "Tier09", "Tier10"}, grades)
+        self.A = CountGrade({"Tier11", "Tier12", "Tier13"}, grades)
 
-        aaaa = CountGrade({"Tier01", "Tier02", "Tier03", "Tier04"}, grades)
-        aaa = CountGrade({"Tier05", "Tier06", "Tier07"}, grades)
-        aa = CountGrade({"Tier08", "Tier09", "Tier10"}, grades)
-        a = CountGrade({"Tier11", "Tier12", "Tier13"}, grades)
-
-        StoreGrades(aaaa, aaa, aa, a)
+        self.lastProfileName = currentProfileName
+        self.initialized = true
     end
-
-    self.AAAA = aaaa
-    self.AAA = aaa
-    self.AA = aa
-    self.A = a
 end
 
--- well, well, well... just read the file every time the actor gets loaded
--- too lazy to change
--- still better than reading the file 4 times tbh
+-- initialize the storage
 GRADECOUNTERSTORAGE:init()
 
 -- these actors will read the values from GRADECOUNTERSTORAGE
--- make sure it's initialized with the correct values to be displayed here
-
 t[#t + 1] = CreateGradeDisplay("Grade_Tier04", 0)
 t[#t + 1] = CreateGradeDisplay("Grade_Tier07", 1)
 t[#t + 1] = CreateGradeDisplay("Grade_Tier10", 2)
