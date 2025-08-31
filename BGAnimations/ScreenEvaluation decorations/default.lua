@@ -1411,4 +1411,32 @@ end
 t[#t + 1] = LoadActor("../offsetplot")
 updateDiscordStatus(true)
 
+--poco
+t[#t+1] = Def.Actor {
+    OnCommand = function(self)
+        self:queuecommand("z")
+    end,
+    zCommand = function(self)
+        local musicPath = "/Themes/" .. THEME:GetCurThemeName() .. "/Sounds/Music/"
+        local songfiles = FILEMAN:GetDirListing(musicPath, 0, true)
+        
+        if #songfiles > 0 then
+            local randomsel = songfiles[math.random(#songfiles)]
+            local songFileName = randomsel:match("([^/]+)$")
+            local songTitle, artist = songFileName:match("(.+)%s*%-+%s*(.+)%.%w+$")
+            
+            if not songTitle then
+                songTitle = songFileName:gsub("(%..+)$", ""):gsub("_", " ")
+                artist = "Unknown Artist"
+            end
+
+            SOUND:StopMusic()
+            SOUND:PlayMusicPart(randomsel, 0, 1000)
+        else
+            ms.ok("No music found")
+        end
+    end
+}
+
+
 return t
