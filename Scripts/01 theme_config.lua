@@ -14,8 +14,6 @@ local defaultConfig = {
 		FadeNoteFieldInSyncMachine = true,
 		ShowPlayerOptionsHint = true,
 		ShowBanners = true, -- false to turn off banners everywhere
-		AdvancedPlayerTracker = false,
-		ResultScreenStyle = 1 -- 1=Unredable 2=Reimuboobs 3=TilDeath
 	},
 	NPSDisplay = {
 		MaxWindow = 2,

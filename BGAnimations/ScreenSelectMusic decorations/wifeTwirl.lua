@@ -22,8 +22,6 @@ local previewVisible = false
 local onlyChangedSteps = false
 local shouldPlayMusic = false
 local prevtab = 0
-local positionMSDtextaddxIni = 255
-local positionMSDtextaddxFin = - 255
 
 local itsOn = false
 
@@ -38,7 +36,8 @@ local translated_info = {
 	Ready = THEME:GetString("GeneralInfo", "Ready"),
 	TogglePreview = THEME:GetString("ScreenSelectMusic", "TogglePreview"),
 	PlayerOptions = THEME:GetString("ScreenSelectMusic", "PlayerOptions"),
-	OpenSort = THEME:GetString("ScreenSelectMusic", "OpenSortMenu")
+	OpenSort = THEME:GetString("ScreenSelectMusic", "OpenSortMenu"),
+	CloseSort = THEME:GetString("ScreenSelectMusic", "CloseSortMenu"),
 }
 
 -- to reduce repetitive code for setting preview music position with booleans
@@ -155,7 +154,7 @@ local t = Def.ActorFrame {
 		self:queuecommand("MintyFresh")
 	end,
 	OffCommand = function(self)
-		self:bouncebegin(0.2):xy(0, -500):diffusealpha(0)
+		self:bouncebegin(0.2):xy(-500, 0):diffusealpha(0)
 		toggleCalcInfo(false)
 		self:sleep(0.04):queuecommand("Invis")
 	end,
@@ -360,6 +359,9 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 			capWideScale(get43size(360), 360) / capWideScale(get43size(0.45), 0.45)
 		)
 	end,
+	CurrentRateChangedMessageCommand = function(self)
+		self:queuecommand("MintyFresh")
+	end,
 	MintyFreshCommand = function(self)
 		if song then
 			self:settext(getCurRateDisplayString())
@@ -433,7 +435,7 @@ t[#t + 1] = Def.ActorFrame {
 			end
 		end
 	},
-	-- skillset stuff (these 3 can prolly be wrapped)
+	-- skillset suff (these 3 can prolly be wrapped)
 	LoadFont("Common Normal") .. {
 		InitCommand = function(self)
 			self:xy(frameX + 120, frameY - 60):halign(0):zoom(0.6, maxwidth, 125)
@@ -449,17 +451,10 @@ t[#t + 1] = Def.ActorFrame {
 			end
 		end,
 		ChartPreviewOnMessageCommand = function(self)
-			self:accelerate(0.1)
-			if IsUsingWideScreen() then
-			self:addx(positionMSDtextaddxIni)
-			end
+			self:visible(false)
 		end,
 		ChartPreviewOffMessageCommand = function(self)
 			self:visible(true)
-			self:accelerate(0.2)
-			if IsUsingWideScreen() then
-				self:addx(positionMSDtextaddxFin)
-			end
 		end
 	},
 	LoadFont("Common Normal") .. {
@@ -476,17 +471,10 @@ t[#t + 1] = Def.ActorFrame {
 			end
 		end,
 		ChartPreviewOnMessageCommand = function(self)
-			self:accelerate(0.15)
-			if IsUsingWideScreen() then
-				self:addx(positionMSDtextaddxIni)
-			end
+			self:visible(false)
 		end,
 		ChartPreviewOffMessageCommand = function(self)
 			self:visible(true)
-			self:accelerate(0.15)
-			if IsUsingWideScreen() then
-			self:addx(positionMSDtextaddxFin)
-			end
 		end
 	},
 	LoadFont("Common Normal") .. {
@@ -503,17 +491,10 @@ t[#t + 1] = Def.ActorFrame {
 			end
 		end,
 		ChartPreviewOnMessageCommand = function(self)
-			self:accelerate(0.2)
-			if IsUsingWideScreen() then
-				self:addx(positionMSDtextaddxIni)
-			end
+			self:visible(false)
 		end,
 		ChartPreviewOffMessageCommand = function(self)
 			self:visible(true)
-			self:accelerate(0.1)
-			if IsUsingWideScreen() then
-				self:addx(positionMSDtextaddxFin)
-				end
 		end
 	},
 	-- **score related stuff** These need to be updated with rate changed commands
@@ -920,12 +901,7 @@ t[#t + 1] = Def.Sprite {
 	end,
 	ChartPreviewOffMessageCommand = function(self)
 		self:visible(BannersEnabled())
-	end,
-	OptionUpdatedMessageCommand = function(self)
-		if not previewVisible then
-		self:visible(BannersEnabled())
-		end
-	end,
+	end
 }
 local enabledC = "#099948"
 local disabledC = "#ff6666"
@@ -1113,10 +1089,17 @@ t[#t + 1] = LoadFont("Common Normal") .. {
 
 --Chart Preview Button
 local yesiwantnotefield = false
+local lastratepresses = {0,0}
 local function ihatestickinginputcallbackseverywhere(event)
 	if event.type ~= "InputEventType_Release" and getTabIndex() == 0 then
 		if event.DeviceInput.button == "DeviceButton_space" then
 			toggleNoteField()
+		end
+		if event.GameButton == "EffectUp" then
+			lastratepresses[1] = 0
+		end
+		if event.GameButton == "EffectDown" then
+			lastratepresses[2] = 0
 		end
 	end
 	if event.type == "InputEventType_FirstPress" then
@@ -1124,12 +1107,24 @@ local function ihatestickinginputcallbackseverywhere(event)
 		if CtrlPressed and event.DeviceInput.button == "DeviceButton_l" then
 			MESSAGEMAN:Broadcast("LoginHotkeyPressed")
 		end
+		if event.GameButton == "EffectUp" then
+			lastratepresses[1] = GetTimeSinceStart()
+		end
+		if event.GameButton == "EffectDown" then
+			lastratepresses[2] = GetTimeSinceStart()
+		end
+		-- this sucks so bad
+		if math.abs(lastratepresses[1] - lastratepresses[2]) < 0.05 and lastratepresses[1] ~= 0 and lastratepresses[2] ~= 0 then
+			MESSAGEMAN:Broadcast("Code", {Name="ResetRate"})
+			ChangeMusicRate(nil, {Name="ResetRate"})
+		end
 	end
 	return false
 end
 
 local prevplayerops = "Main"
 
+local lastsortmode = nil
 t[#t + 1] = Def.ActorFrame {
 	Name = "LittleButtonsOnTheLeft",
 
@@ -1253,6 +1248,13 @@ t[#t + 1] =
 		end,
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" then
+				if GAMESTATE:GetSortOrder() == "SortOrder_ModeMenu" then
+					if lastsortmode == nil then lastsortmode = "SortOrder_Group" end
+					SCREENMAN:GetTopScreen():GetMusicWheel():ChangeSort(lastsortmode)
+					return
+				end
+				lastsortmode = GAMESTATE:GetSortOrder()
+
 				local ind = 0 -- 0 is group sort usually
 				-- find the sort mode menu no matter where it is
 				for i, sm in ipairs(SortOrder) do
@@ -1264,51 +1266,22 @@ t[#t + 1] =
 				SCREENMAN:GetTopScreen():GetMusicWheel():ChangeSort(ind)
 			end
 		end,
+		SortOrderChangedMessageCommand = function(self)
+			local so = GAMESTATE:GetSortOrder()
+			if so == "SortOrder_ModeMenu" then
+				self:settext(translated_info["CloseSort"])
+			else
+				self:settext(translated_info["OpenSort"])
+			end
+		end,
 		MouseOverCommand = function(self)
 			self:diffusealpha(hoverAlpha2)
 		end,
 		MouseOutCommand = function(self)
 			self:diffusealpha(1)
 		end,
-	},
-	
---[[
-	UIElements.TextToolTip(1, 1, "Common Large") .. {
-		Name="rando",
-		InitCommand = function(self)
-			self:xy(20, 185 ):halign(0):zoom(0.27):diffuse(getMainColor("positive"))
-			self:settextf("Random Song")
-		end,
-		MouseOverCommand = function(self)
-			self:diffusealpha(hoverAlpha)
-		end,
-		MouseOutCommand = function(self)
-			self:diffusealpha(1)
-		end,
-		MouseDownCommand = function(self, params)
-			if params.event == "DeviceButton_left mouse button" then
-				local w = SCREENMAN:GetTopScreen():GetMusicWheel()
-	
-				if INPUTFILTER:IsShiftPressed() and self.lastlastrandom ~= nil then
-	
-					-- if the last random song wasnt filtered out, we can select it
-					-- so end early after jumping to it
-					if w:SelectSong(self.lastlastrandom) then
-						return
-					end
-					-- otherwise, just pick a new random song
-				end
-	
-				local t = w:GetSongs()
-				if #t == 0 then return end
-				local random_song = t[math.random(#t)]
-				w:SelectSong(random_song)
-				self.lastlastrandom = self.lastrandom
-				self.lastrandom = random_song
-			end
-		end
-    }
-]]
+	}
 }
+
 t[#t + 1] = LoadActorWithParams("../_chartpreview.lua", {yPos = prevY, yPosReverse = prevrevY})
 return t

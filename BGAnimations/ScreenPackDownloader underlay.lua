@@ -46,6 +46,7 @@ local leftSpace = 10
 local cancelFrameY = 56
 
 local selectedTags = {}
+local tagsMatchAny = true
 local nameInput = ""
 
 local o = Def.ActorFrame {
@@ -72,69 +73,6 @@ local o = Def.ActorFrame {
 
 }
 
-local playingMusic = {}
-local playingMusicCounter = 1
-
---Title text
-o[#o + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	InitCommand=function(self)
-		self:xy(150,50):zoom(0.5)
-		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
-		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
-	end,
-	OnCommand=function(self)
-		self:settext("Pack Downloads")
-	end,
-	MouseOverCommand = function(self)
-		self:diffusealpha(0.6)
-	end,
-	MouseOutCommand = function(self)
-		self:diffusealpha(1)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			local function startSong()
-				local sngs = SONGMAN:GetAllSongs()
-				if #sngs == 0 then ms.ok("No songs to play") return end
-
-				local s = sngs[math.random(#sngs)]
-				local p = s:GetMusicPath()
-				local l = s:MusicLengthSeconds()
-				local top = SCREENMAN:GetTopScreen()
-
-				local thisSong = playingMusicCounter
-				playingMusic[thisSong] = true
-
-				SOUND:StopMusic()
-				SOUND:PlayMusicPart(p, 0, l)
-	
-				ms.ok("NOW PLAYING: "..s:GetMainTitle() .. " | LENGTH: "..SecondsToMMSS(l))
-	
-				top:setTimeout(
-					function()
-						if not playingMusic[thisSong] then return end
-						playingMusicCounter = playingMusicCounter + 1
-						startSong()
-					end,
-					l
-				)
-	
-			end
-	
-			SCREENMAN:GetTopScreen():setTimeout(function()
-					playingMusic[playingMusicCounter] = false
-					playingMusicCounter = playingMusicCounter + 1
-					startSong()
-				end,
-			0.1)
-		else
-			SOUND:StopMusic()
-			playingMusic = {}
-			playingMusicCounter = playingMusicCounter + 1
-			ms.ok("Stopped music")
-		end
-	end,
-}
 
 
 o[#o+1] = Def.ActorFrame {
@@ -143,6 +81,15 @@ o[#o+1] = Def.ActorFrame {
 		self:xy(leftSpace + tagFrameWidth/2, cancelFrameY)
 	end,
 
+	LoadFont("Common Large") .. {
+		Name = "TitleText",
+		InitCommand = function(self)
+			self:y(-cancelFrameY/2)
+			self:zoom(0.4)
+			self:maxwidth(SCREEN_WIDTH / 2)
+			self:settext("Pack Downloads")
+		end
+	},
 	UIElements.TextButton(1, 1, "Common Large") .. {
 		Name = "StopAllDownloadsButton",
 		InitCommand = function(self)
@@ -185,7 +132,6 @@ o[#o+1] = Def.ActorFrame {
 					count = count + 1
 				end
 				if count > 0 then
-					SOUND:PlayOnce(THEME:GetPathS("", "canceldl"))
 					ms.ok("Stopped All Downloads: "..count.." Downloads")
 				end
 			end
@@ -201,7 +147,7 @@ o[#o+1] = Def.ActorFrame {
 
 			self.txt:xy(tagFrameWidth/4 - leftSpace/4, packh/2)
 			self.txt:valign(0.5)
-			self.txt:settext("Stop Current Download")
+			self.txt:settext(translated_info["CancelCurrent"])
 			self.txt:zoom(0.4)
 			self.txt:maxwidth((tagFrameWidth/2 - leftSpace) / 0.4)
 
@@ -225,7 +171,6 @@ o[#o+1] = Def.ActorFrame {
 			if params.update == "OnMouseDown" then
 				local dl = DLMAN:GetDownloads()[1]
 				if dl then
-					SOUND:PlayOnce(THEME:GetPathS("", "canceldl"))
 					dl:Stop()
 				end
 			end
@@ -234,7 +179,7 @@ o[#o+1] = Def.ActorFrame {
 }
 
 local function tagframe()
-	local maxtags = 7
+	local maxtags = 12
 	local curpage = 1
 
 	local frameBGHeight = SCREEN_HEIGHT - (f0y-30) - leftSpace
@@ -255,9 +200,20 @@ local function tagframe()
 			return tonumber(ax) < tonumber(bx)
 		end)
 		local otherTags = table.sorted(alltags["pack_tag"] or {})
-		orderedTags = table.combine(keycountTags, skillsetTags, otherTags)
+		local bundleTags = table.withfuncapplied(alltags["pack_bundle"] or {}, function(key,val)
+			return key, "Bundle: " .. val:sub(1,1):upper() .. val:sub(2)
+		end)
+		orderedTags = table.combine(keycountTags, skillsetTags, otherTags, bundleTags)
 	end
 	loadTags()
+
+	local function unbundleize(bundlestr)
+		local bundleWord = "Bundle: "
+		if bundlestr:find(bundleWord) ~= nil then
+			bundlestr = bundlestr:sub(#bundleWord+1):lower()
+		end
+		return bundlestr
+	end
 
 	local function movePage(n)
 		local newpage = curpage + n
@@ -309,7 +265,7 @@ local function tagframe()
 		LoadFont("Common Large") .. {
 			Name = "TagExplain",
 			InitCommand = function(self)
-				self:settext("Tags")
+				self:settext("Select tags to filter packs")
 				self:zoom(0.4)
 				self:valign(0)
 				self:xy(frameBGWidth/2, leftSpace)
@@ -321,7 +277,7 @@ local function tagframe()
 			InitCommand = function(self)
 				self:zoom(0.2)
 				self:valign(1):halign(1)
-				self:xy(frameBGWidth - leftSpace/2, tagListStartY - tagSpacing)
+				self:xy(frameBGWidth - leftSpace/1.4, tagListStartY - tagSpacing - (packh*0.85))
 			end,
 			UpdateTagsCommand = function(self)
 				self:settextf("%d-%d of %d", (curpage-1) * maxtags + 1, math.min(#orderedTags, curpage * maxtags), #orderedTags)
@@ -359,10 +315,10 @@ local function tagframe()
 				local tags = {}
 				for k,v in pairs(selectedTags) do
 					if v == true then
-						tags[#tags+1] = k
+						tags[#tags+1] = unbundleize(k)
 					end
 				end
-				MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags=tags})
+				MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags=tags, tagsMatchAny=tagsMatchAny})
 			end,
 		},
 		UIElements.TextButton(1, 1, "Common Large") .. {
@@ -396,7 +352,47 @@ local function tagframe()
 				if params.update ~= "OnMouseDown" then return end
 				selectedTags = {}
 				self:GetParent():playcommand("UpdateTags")
-				MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags={}})
+				MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags={}, tagsMatchAny=tagsMatchAny})
+			end,
+		},
+		UIElements.TextButton(1, 1, "Common Large") .. {
+			Name = "ANDORButton",
+			InitCommand = function(self)
+				self.bg = self:GetChild("BG")
+				self.txt = self:GetChild("Text")
+				self:xy(tagFrameWidth/3 + tagFrameWidth/3 - leftSpace/3.3, tagListStartY - tagSpacing - packh*0.8)
+
+				self.txt:xy(tagFrameWidth/6 - leftSpace/4, (packh*0.8)/2)
+				self.txt:settext(tagsMatchAny and "OR" or "AND")
+				self.txt:zoom(0.4)
+				self.txt:maxwidth((tagFrameWidth/3 - leftSpace) / 0.4)
+				self.bg:zoomto(tagFrameWidth/3 - leftSpace/2, packh*0.8)
+				self.bg:halign(0):valign(0)
+				self.bg:diffuse(color("#ffffff"))
+
+				self.alphaDeterminingFunction = function(self)
+					if isOver(self.bg) then
+						self.bg:diffusealpha(0.8)
+					else
+						self.bg:diffusealpha(0.4)
+					end
+				end
+				self:alphaDeterminingFunction()
+			end,
+			RolloverUpdateCommand = function(self, params)
+				self:alphaDeterminingFunction()
+			end,
+			ClickCommand = function(self, params)
+				if params.update ~= "OnMouseDown" then return end
+				tagsMatchAny = not tagsMatchAny
+				self.txt:settext(tagsMatchAny and "OR" or "AND")
+				local tags = {}
+				for k,v in pairs(selectedTags) do
+					if v == true then
+						tags[#tags+1] = unbundleize(k)
+					end
+				end
+				MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags=tags, tagsMatchAny=tagsMatchAny})
 			end,
 		},
 	}
@@ -487,10 +483,10 @@ o[#o + 1] = Def.ActorFrame {
 					local tags = {}
 					for k,v in pairs(selectedTags) do
 						if v == true then
-							tags[#tags+1] = k
+							tags[#tags+1] = unbundleize(k)
 						end
 					end
-					MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags=tags})
+					MESSAGEMAN:Broadcast("InvokePackSearch", {name=nameInput, tags=tags, tagsMatchAny=tagsMatchAny})
 				else
 					local del = btn == "DeviceButton_delete"
 					local bs = btn == "DeviceButton_backspace"
@@ -570,7 +566,7 @@ o[#o + 1] = Def.ActorFrame {
 			self:xy(-2,-1) -- font problems
 			self:halign(1)
 			self:zoom(fontScale)
-			self:settextf("%s:", "Search")
+			self:settextf("%s:", translated_info["SearchName"])
 		end,
 	},
 	LoadFont("Common Normal") .. {
@@ -583,17 +579,6 @@ o[#o + 1] = Def.ActorFrame {
 	}
 }
 
-o[#o + 1] =
-	Def.Sprite{
-		Texture=THEME:GetPathG("","packdownloadbg");
-		InitCommand=function(self)
-			self:xy(SCREEN_CENTER_X,SCREEN_CENTER_Y):zoom(0.4)
-			self:scaletocover(0, 0, SCREEN_WIDTH, SCREEN_BOTTOM)
-			self:diffusealpha(0.2)
-		end
-	}
-
 o[#o + 1] = LoadActor("packlistDisplay")
-o[#o + 1] = LoadActor("_xoon3")
 
 return o

@@ -7,11 +7,6 @@ local borderWidth = 4
 t[#t + 1] = UIElements.QuadButton(1, 1) .. {
 	InitCommand = function(self)
 		self:xy(SCREEN_RIGHT, 0):halign(1):valign(0):zoomto(SCREEN_WIDTH / 2.43, topFrameHeight):diffuse(getMainColor("frames")):diffusealpha(0.6):fadebottom(0.7)
-		
-		local screenName = SCREENMAN:GetTopScreen():GetName()
-		if screenName == "ScreenEvaluation" then
-			self:diffusealpha(0)
-		end
 	end
 }
 

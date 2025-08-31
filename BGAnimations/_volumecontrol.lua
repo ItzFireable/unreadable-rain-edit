@@ -112,7 +112,7 @@ t[#t+1] = Def.ActorFrame {
         volumeChangedMessageCommand = function(self)
             self:stoptweening()
             self:zoomto(235 * curGameVolume, 2):finishtweening()
-            self:smooth(0.3):diffusealpha(1):sleep(0.1):smooth(0.3):smooth(0.2):diffusealpha(0)
+            self:smooth(0.3):diffusealpha(0.5):sleep(0.1):smooth(0.3):smooth(0.2):diffusealpha(0)
         end,
     },
 }

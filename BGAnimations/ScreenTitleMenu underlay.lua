@@ -4,7 +4,7 @@ end
 
 local t = Def.ActorFrame {}
 
---thing made by dashdash, what a surprise, unredable rain now has actual rain
+--thing made by dashdash, what a surprise, unreadable rain now has actual rain
 local rain = function(angle, intensity)
     local speed = 1 - math.min(intensity, 800) / 2500
     local t = Def.ActorFrame {}

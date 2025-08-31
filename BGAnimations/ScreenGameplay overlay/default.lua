@@ -1,7 +1,6 @@
 -- Everything relating to the gameplay screen is gradually moved to WifeJudgmentSpotting.lua
 local inReplay = GAMESTATE:GetPlayerState():GetPlayerController() == "PlayerController_Replay"
 local inCustomize = playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).CustomizeGameplay
-local isDarkWife = themeConfig:get_data().global.AdvancedPlayerTracker
 local isPractice = GAMESTATE:IsPracticeMode()
 
 if not inReplay and not inCustomize and not isPractice then
@@ -9,14 +8,7 @@ if not inReplay and not inCustomize and not isPractice then
 end
 
 local t = Def.ActorFrame {}
-
---tanned wife check
-if isDarkWife then
-	t[#t + 1] = LoadActor("DarkWifeJudgmentSpotting")
-else
 t[#t + 1] = LoadActor("WifeJudgmentSpotting")
-end
-
 t[#t + 1] = LoadActor("titlesplash")
 t[#t + 1] = LoadActor("leaderboard")
 if inReplay then

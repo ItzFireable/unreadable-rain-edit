@@ -7,10 +7,6 @@ local function BroadcastIfActive(msg)
 	end
 end
 
-local playCount = 0
-local playTime = 0
-local noteCount = 0
-
 local translated_info = {
 	Validated = THEME:GetString("TabProfile", "ScoreValidated"),
 	Invalidated = THEME:GetString("TabProfile", "ScoreInvalidated"),
@@ -26,13 +22,6 @@ local translated_info = {
 	ValidateAll = THEME:GetString("TabProfile", "ValidateAllScores"),
 	ForceRecalc = THEME:GetString("TabProfile", "ForceRecalcScores"),
 	UploadAllScore = THEME:GetString("TabProfile", "UploadAllScore"),
-
-	--testing new stuff for the profile tab  (clearly not copypasted from player info nono)
-	--for some reason in this new update, if you put this outside the translated bracket the game fucks up so yeah don't do that
-    Plays = THEME:GetString("GeneralInfo", "ProfilePlays"),
-    TapsHit = THEME:GetString("GeneralInfo", "ProfileTapsHit"),
-    Playtime = THEME:GetString("GeneralInfo", "ProfilePlaytime"),
-    PlaysThisSession = THEME:GetString("GeneralInfo", "PlaysThisSession")
 }
 
 local t = Def.ActorFrame {
@@ -78,9 +67,9 @@ local t = Def.ActorFrame {
 	end
 }
 
-local frameX = 20
+local frameX = 10
 local frameY = 45
-local frameWidth = capWideScale(350, 440) --400
+local frameWidth = capWideScale(360, 400)
 local frameHeight = 350
 local fontScale = 0.25
 local scoresperpage = 20
@@ -88,7 +77,7 @@ local scoreYspacing = 12.5
 local distY = 15
 local offsetX = -10
 local offsetY = 20
-local txtDist = 20
+local txtDist = 33
 local rankingSkillset = 1
 local rankingPage = 1
 local numrankingpages = 10
@@ -890,7 +879,7 @@ local function littlebits(i)
 		end,
 		LoadFont("Common Large") .. {
 			InitCommand = function(self)
-				self:xy(-30,( (txtDist * i) + 20)):maxwidth(170 * 2):halign(0):zoom(0.275)
+				self:y(txtDist * i):maxwidth(170 * 2):halign(0):zoom(0.575)
 			end,
 			SetCommand = function(self)
 				self:settext(ms.SkillSetsTranslated[i] .. ":")
@@ -898,7 +887,7 @@ local function littlebits(i)
 		},
 		LoadFont("Common Large") .. {
 			InitCommand = function(self)
-				self:xy(240, ((txtDist * i) + 20)):halign(0):zoom(0.275)
+				self:xy(210, txtDist * i):halign(0):zoom(0.575)
 			end,
 			SetCommand = function(self)
 				local rating = 0
@@ -906,14 +895,13 @@ local function littlebits(i)
 					rating = profile:GetPlayerSkillsetRating(ms.SkillSets[i])
 					self:settextf("%05.2f", rating)
 					self:GetParent():x(frameX + capWideScale(28,45))
-					self:x(88)
+					self:x(210)
 				else
 					rating = DLMAN:GetSkillsetRating(ms.SkillSets[i])
 					self:settextf("%05.2f (#%i)", rating, DLMAN:GetSkillsetRank(ms.SkillSets[i]))
-					self:GetParent():x(frameX + capWideScale(28,45))
-					self:x():maxwidth(9999)
-					if not IsUsingWideScreen() then self:maxwidth(70) end
-					self:x(120)
+					self:GetParent():x(frameX)
+					self:x(capWideScale(184,198)):maxwidth(9999)
+					if not IsUsingWideScreen() then self:maxwidth(270) end
 				end
 				self:diffuse(byMSD(rating))
 			end,
@@ -934,7 +922,6 @@ end
 
 local user
 local pass
-local statsX = capWideScale(get43size(275),260)
 local profilebuttons = Def.ActorFrame {
 	InitCommand = function(self)
 	end,
@@ -950,84 +937,6 @@ local profilebuttons = Def.ActorFrame {
 			user = ""
 		end
 	end,
-
-	LoadFont("Common Large") .. { --taps
-			InitCommand = function(self)
-				self:xy(statsX , ((txtDist * i) - 25)):maxwidth(170 * 3):halign(0):zoom(0.275) --260
-			end,
-			SetCommand = function(self)
-				self:settextf("%s %s", noteCount, translated_info["TapsHit"])
-			end,
-		},
-		LoadFont("Common Large") .. { --playtime
-			InitCommand = function(self)
-				self:xy(statsX , ((txtDist * i) - 10)):maxwidth(170 * 3):halign(0):zoom(0.275)
-			end,
-			BeginCommand = function(self)
-				self:queuecommand("Set")
-			end,
-			SetCommand = function(self)
-				local time = SecondsToHHMMSS(playTime)
-				self:settextf("%s %s", time, translated_info["Playtime"])
-			end,
-		},
-		LoadFont("Common Large") .. { --plays
-		InitCommand = function(self)
-			self:xy(statsX , ((txtDist * i) + 5)):maxwidth(170 * 3):halign(0):zoom(0.275)
-		end,
-		SetCommand = function(self)
-			self:settextf("%s %s", playCount, translated_info["Plays"])
-		end,
-	},
-		LoadFont("Common Large") .. { --playsonthissession
-		InitCommand = function(self)
-			self:xy(statsX , ((txtDist * i) + 20)):maxwidth(170 * 3):halign(0):zoom(0.275)
-		end,
-		SetCommand = function(self)
-			self:settextf(SCOREMAN:GetNumScoresThisSession() .. " " .. translated_info["PlaysThisSession"])
-		end,
-	},
-
-
-	-- grade functionality in profile page here, thx steffen <3
-	LoadFont("Common Large") .. { --AAAA
-	InitCommand = function(self)
-		self:xy(statsX , ((txtDist * i) + 45)):maxwidth(170 * 3):halign(0):zoom(0.275)
-	end,
-	SetCommand = function(self)
-		local scores = GRADECOUNTERSTORAGE.AAAA
-		self:settextf("%ss: %d", getGradeStrings("Grade_Tier04"), scores):diffuse(getGradeColor("Grade_Tier04"))
-	end,
-    },
-	LoadFont("Common Large") .. { --AAA
-		InitCommand = function(self)
-			self:xy(statsX , ((txtDist * i) + 60)):maxwidth(170 * 3):halign(0):zoom(0.275)
-		end,
-		SetCommand = function(self)
-			local scores = GRADECOUNTERSTORAGE.AAA
-			self:settextf("%ss: %d", getGradeStrings("Grade_Tier07"), scores):diffuse(getGradeColor("Grade_Tier07"))
-		end,
-	},
-	LoadFont("Common Large") .. { --AA
-	InitCommand = function(self)
-		self:xy(statsX , ((txtDist * i) + 75)):maxwidth(170 * 3):halign(0):zoom(0.275)
-	end,
-	SetCommand = function(self)
-		local scores = GRADECOUNTERSTORAGE.AA
-		self:settextf("%ss: %d", getGradeStrings("Grade_Tier10"), scores):diffuse(getGradeColor("Grade_Tier10"))
-	end,
-},
-LoadFont("Common Large") .. { --A
-	InitCommand = function(self)
-		self:xy(statsX , ((txtDist * i) + 90)):maxwidth(170 * 3):halign(0):zoom(0.275)
-	end,
-	SetCommand = function(self)
-		local scores = GRADECOUNTERSTORAGE.A
-		self:settextf("%ss: %d", getGradeStrings("Grade_Tier13"), scores):diffuse(getGradeColor("Grade_Tier13"))
-	end,
-},
-
-
 	UpdateRankingMessageCommand = function(self)
 		if rankingSkillset == 1 and update and not recentactive then
 			self:visible(true)
@@ -1134,27 +1043,6 @@ LoadFont("Common Large") .. { --A
 	},
 }
 
-t[#t + 1] = Def.Actor {
-	BeginCommand = function(self)
-		self:queuecommand("Set")
-	end,
-	SetCommand = function(self)
-		profile = GetPlayerOrMachineProfile(PLAYER_1)
-		profileName = profile:GetDisplayName()
-		playCount = SCOREMAN:GetTotalNumberOfScores()
-		playTime = profile:GetTotalSessionSeconds()
-		noteCount = profile:GetTotalTapsAndHolds()
-		playerRating = profile:GetPlayerRating()
-	end,
-	PlayerRatingUpdatedMessageCommand = function(self)
-		playerRating = profile:GetPlayerRating()
-		self:GetParent():GetChild("AvatarPlayerNumber_P1"):GetChild("Name"):playcommand("Set")
-	end
-}
-
-
 t[#t + 1] = profilebuttons
 t[#t + 1] = r
-
-t[#t + 1] = LoadActor("../gradecounter")
 return t
