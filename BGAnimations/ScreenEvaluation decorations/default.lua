@@ -138,7 +138,7 @@ t[#t+1] = Def.ActorFrame {
 			if GAMESTATE:GetCurrentSong():GetDisplaySubTitle() == "" then
 			   self:settext("")
 		    else
-			   self:settext("''"..GAMESTATE:GetCurrentSong():GetDisplaySubTitle().. "''")
+			   self:settext("\""..GAMESTATE:GetCurrentSong():GetDisplaySubTitle().. "\"")
 		    end
 		end,
 	},

@@ -1140,14 +1140,6 @@ t[#t + 1] = Def.ActorFrame {
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" and (song or noteField) then
 				toggleNoteField()
-			elseif params.event == "DeviceButton_right mouse button" and (song or noteField) then
-				if mcbootlarder:IsVisible() then
-					toggleCalcInfo(not infoOnScreen)
-				else
-					if toggleNoteField() then
-						toggleCalcInfo(true)
-					end
-				end
 			end
 		end,
 		ChartPreviewOnMessageCommand = function(self)
