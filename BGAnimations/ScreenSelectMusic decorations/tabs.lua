@@ -69,8 +69,8 @@ local t =
 	end,
 }
 
-local frameWidth = capWideScale(get43size(450), 450) / (#tabNames - 1)
-local frameX = frameWidth / 2 + 2
+local frameWidth = capWideScale(get43size(453.5), 453.5) / (#tabNames - 1)
+local frameX = frameWidth / 2
 local frameY = SCREEN_TOP - 2
 
 local function tabs(index)
@@ -88,10 +88,10 @@ local function tabs(index)
 			--show tab if it's the currently selected one
 			if getTabIndex() == index - 1 then
 				self:diffusealpha(1):y(frameY + 2)
-				self:GetChild("TabBG"):diffusecolor(Brightness(getMainColor("positive"),0.3)):diffusealpha(0.5)
+				self:GetChild("TabBG"):diffusecolor(Brightness(getMainColor("positive"),0.7)):diffusealpha(0.7)
 			else -- otherwise "Hide" them
 				self:diffusealpha(0.7):y(frameY)
-				self:GetChild("TabBG"):diffusecolor(getMainColor("frames")):diffusealpha(0.7)
+				self:GetChild("TabBG"):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 			end
 		end,
 		TabChangedMessageCommand = function(self)
@@ -102,7 +102,7 @@ local function tabs(index)
 	t[#t + 1] = UIElements.QuadButton(1, 1) .. {
 		Name = "TabBG",
 		InitCommand = function(self)
-			self:y(0):valign(0):zoomto(frameWidth, 20):diffusecolor(getMainColor("frames")):diffusealpha(0.7)
+			self:y(0):valign(0):zoomto(frameWidth, 20):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end,
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" then

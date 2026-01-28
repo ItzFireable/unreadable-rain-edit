@@ -50,13 +50,15 @@ t[#t + 1] = LoadActor("../_PlayerInfo")
 if showVisualizer then
 	local vis = audioVisualizer:new {
 		x = 425,
-		y = SCREEN_BOTTOM,
+		y = SCREEN_BOTTOM - 5,
 		maxHeight = 34,
+		width = 348,
+		spacing = 2,
 		freqIntervals = audioVisualizer.multiplyIntervals(audioVisualizer.defaultIntervals, 8),
 		color = getMainColor("positive"),
 		onBarUpdate = function(self)
 			--[
-			self:diffusetopedge(getMainColor("frames"))
+			self:diffusetopedge(getMainColor("positive"))
 			self:diffusebottomedge(getMainColor("positive"))
 			--]]
 			--[[

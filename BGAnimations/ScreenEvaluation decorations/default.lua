@@ -138,7 +138,7 @@ t[#t+1] = Def.ActorFrame {
 			if GAMESTATE:GetCurrentSong():GetDisplaySubTitle() == "" then
 			   self:settext("")
 		    else
-			   self:settext("\""..GAMESTATE:GetCurrentSong():GetDisplaySubTitle().. "\"")
+			   self:settext("''"..GAMESTATE:GetCurrentSong():GetDisplaySubTitle().. "''")
 		    end
 		end,
 	},
@@ -370,7 +370,7 @@ local function scoreBoard(pn, position)
 				InitCommand = function(self)
 					self:zoomto(capWideScale(get43size(235),235), 25)
 					self:halign(0):valign(1)
-					self:diffuse(getMainColor("tabs"))
+					self:diffuse(getMainColor("tabs")):diffusealpha(0.7)
 				end,
 				MouseClickCommand = function(self, params)
 					if self:IsVisible() and usingCustomWindows then
@@ -1438,5 +1438,6 @@ t[#t+1] = Def.Actor {
     end
 }
 
+t[#t + 1] = LoadActor("manipfactor")
 
 return t

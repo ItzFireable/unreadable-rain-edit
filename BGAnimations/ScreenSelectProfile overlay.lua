@@ -17,7 +17,7 @@ local function GetLocalProfiles()
 			Name = p,
 			Def.Quad {
 				InitCommand = function(self)
-					self:y(-3.25):align(0.5,0.5):zoomto(260, 39.5):ztest(true)
+					self:y(-3.25):align(0.5,0.5):zoomto(320, 39.5):ztest(true)
 					self:diffusealpha(0)
 				end,
 			},
@@ -26,10 +26,10 @@ local function GetLocalProfiles()
 				InitCommand = function(self)
 					local txt = self:GetChild("Text")
 					local bg = self:GetChild("BG")
-					self:xy(38 / 2, -12)
+					self:xy(8, -8)
 					txt:settextf("%s: %.2f", profile:GetDisplayName(), profile:GetPlayerRating())
-					txt:zoom(0.4):ztest(true):maxwidth((260 - 40 - 4) / 0.4)
-					bg:y(-3.25):align(0.5,0.5):zoomto(260, 39.5):zoomto(260, 39.5)
+					txt:zoom(0.4):ztest(true):maxwidth((320 - 40 - 4) / 0.4)
+					bg:y(-3.25):align(0.5,0.5):zoomto(320, 39.5):zoomto(320, 39.5)
 					self:z((PROFILEMAN:GetNumLocalProfiles() - p))
 				end,
 				ClickCommand = function(self, params)
@@ -52,16 +52,16 @@ local function GetLocalProfiles()
 			LoadFont("Common Normal") ..  {
 				Name = "SongsPlayed",
 				InitCommand = function(self)
-					self:xy(38 / 2, 8):zoom(0.5):vertspacing(-8):ztest(true):maxwidth((260 - 40 - 4 - 60) / 0.5)
+					self:xy(8, 6):zoom(0.4):vertspacing(-8):ztest(true):maxwidth((320 - 40 - 4 - 60) / 0.5)
 				end,
 				BeginCommand = function(self)
 					local numSongsPlayed = profile:GetNumTotalSongsPlayed()
-					self:settextf("%i %s", numSongsPlayed, translated_info["SongPlayed"])
+					self:settextf("%i %s", numSongsPlayed, numSongsPlayed == 1 and translated_info["SongPlayed"] or translated_info["SongsPlayed"])
 				end
 			},
 			Def.Sprite {
 				InitCommand = function(self)
-					self:visible(true):halign(0):xy(-127, -3):ztest(true)
+					self:visible(true):halign(0):xy(-156, -3):ztest(true)
 				end,
 				BeginCommand = function(self)
 					self:queuecommand("ModifyAvatar")
@@ -83,7 +83,7 @@ local function LoadCard(cColor)
 	local t = Def.ActorFrame {
 		Def.Quad {
 			InitCommand = function(self)
-				self:zoomto(260 + 4, 230 + 4)
+				self:zoomto(320 + 8, 230 + 8)
 			end,
 			OnCommand = function(self)
 				self:diffuse(color("1,1,1,1"))
@@ -91,7 +91,7 @@ local function LoadCard(cColor)
 		},
 		Def.Quad {
 			InitCommand = function(self)
-				self:zoomto(260, 230)
+				self:zoomto(320, 230)
 			end,
 			OnCommand = function(self)
 				self:diffusealpha(0.5):diffuse(cColor)
@@ -107,7 +107,6 @@ local function LoadPlayerStuff(Player)
 
 	t[#t + 1] = Def.ActorFrame {
 		Name = "JoinFrame",
-		LoadCard(Color("Purple")),
 		LoadFont("Common Normal") .. {
 			Text = translated_info["PressStart"],
 			InitCommand = function(self)
@@ -120,17 +119,13 @@ local function LoadPlayerStuff(Player)
 	}
 
 	t[#t + 1] = Def.ActorFrame {
-		Name = "BigFrame",
-		LoadCard(Brightness(getMainColor("positive"), 0.3)),
-	}
-	t[#t + 1] = Def.ActorFrame {
 		Name = "SmallFrame",
 		InitCommand = function(self)
 			self:y(-2)
 		end,
 		Def.Quad {
 			InitCommand = function(self)
-				self:zoomto(260, 40 + 2)
+				self:zoomto(320, 40 + 2)
 			end,
 			OnCommand = function(self)
 				self:diffusealpha(0.3)
@@ -174,14 +169,12 @@ local function UpdateInternal3(self, Player)
 	local seltext = frame:GetChild("SelectedProfileText")
 	local joinframe = frame:GetChild("JoinFrame")
 	local smallframe = frame:GetChild("SmallFrame")
-	local bigframe = frame:GetChild("BigFrame")
 
 	if GAMESTATE:IsHumanPlayer() then
 		frame:visible(true)
 			--using profile if any
 			joinframe:visible(false)
 			smallframe:visible(true)
-			bigframe:visible(true)
 			seltext:visible(false)--
 			scroller:visible(true)
 			local ind = SCREENMAN:GetTopScreen():GetProfileIndex(Player)
@@ -195,7 +188,6 @@ local function UpdateInternal3(self, Player)
 				else
 					joinframe:visible(true)
 					smallframe:visible(false)
-					bigframe:visible(false)
 					scroller:visible(false)
 					seltext:visible(true):settext(translated_info["NoProfile"])
 				end
@@ -205,7 +197,6 @@ local function UpdateInternal3(self, Player)
 		scroller:visible(false)
 		seltext:visible(false)
 		smallframe:visible(false)
-		bigframe:visible(false)
 	end
 end
 
@@ -300,16 +291,15 @@ t[#t + 1] = Def.ActorFrame {
 		}
 	}
 }
-t[#t + 1] = LoadActor("_frame")
 t[#t + 1] = LoadFont("Common Large") .. {
 	InitCommand = function(self)
-		self:xy(5, 32):halign(0):valign(1):zoom(0.55):diffuse(getMainColor("positive"))
+		self:xy(4, 24):halign(0):valign(1):zoom(0.45):diffuse(getMainColor("positive"))
 		self:settextf("%s:", translated_info["Title"])
 	end
 }
 t[#t+1] = LoadFont("Common Large") .. {
 	InitCommand = function(self)
-		self:xy(5, SCREEN_HEIGHT-21)
+		self:xy(4, SCREEN_HEIGHT-20)
 		self:halign(0):valign(0):zoom(0.35):diffuse(getMainColor("positive"))
 		self:settextf("%s: %s", translated_info["Gamemode"], GAMESTATE:GetCurrentGame():GetName())
 	end,

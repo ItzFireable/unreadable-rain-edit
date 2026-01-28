@@ -202,7 +202,7 @@ local t = Def.ActorFrame {
 	end,
 	Def.Quad {
 		SetCommand = function(self)
-			self:xy(frameX, 45):zoomto(frameWidth, frameHeight):halign(0):valign(0):diffuse(getMainColor("tabs"))
+			self:xy(frameX, 45):zoomto(frameWidth, frameHeight):halign(0):valign(0):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end
 	},
 	Def.Quad {

@@ -1,21 +1,12 @@
 -- all the preview stuff should be var'd and used consistently -mina
 local prevZoom = 0.65
 local musicratio = 1
-local NotefieldPosition = capWideScale(295,160)
+
 local wodth = capWideScale(280, 300)
 local hidth = 40
 local yeet
 local cd
 local calcinfo
-
-
-local ChordDensityThing =
-{
-	SeekPositionX = 0,
-	SeektextPosX = 295,
-	SeekPosY = 20
-}
-
 
 local yPos = Var("yPos")
 local yPosReverse = Var("yPosReverse")
@@ -88,7 +79,7 @@ local t = Def.ActorFrame {
 	NoteFieldVisibleMessageCommand = function(self)
 		self:visible(true)
 		self:SetUpdateFunction(UpdatePreviewPos)
-		cd:visible(true):x(ChordDensityThing.SeekPositionX):y(ChordDensityThing.SeekPosY + 20) -- need to control this manually -mina --20 units have to be away from the graph so it doesn't fuck up reaaaal bad -ifwas
+		cd:visible(true):y(20)				-- need to control this manually -mina
 		cd:GetChild("cdbg"):diffusealpha(0)	-- we want to use our position background for draw order stuff -mina
 		cd:queuecommand("GraphUpdate")		-- first graph will be empty if we dont force this on initial creation
 	end,
@@ -118,7 +109,7 @@ local t = Def.ActorFrame {
 
 		BeginCommand = function(self)
 			self:zoom(prevZoom):draworder(90)
-			self:x(wodth/2):x(NotefieldPosition)
+			self:x(wodth/2)
 			self:GetParent():SortByDrawOrder()
 		end,
 		CurrentStepsChangedMessageCommand = function(self, params)
@@ -147,18 +138,18 @@ local t = Def.ActorFrame {
 	Def.Quad {
 		Name = "BG",
 		InitCommand = function(self)
-			self:xy(wodth/2, SCREEN_HEIGHT/1.5):x(NotefieldPosition):addy(-180)
+			self:xy(wodth/2, (SCREEN_HEIGHT/2) - 109)
 			self:diffuse(color("0.05,0.05,0.05,1"))
 		end,
 		CurrentStyleChangedMessageCommand=function(self)
 			local cols = GAMESTATE:GetCurrentStyle():ColumnsPerPlayer()
-			self:zoomto(52 * cols, SCREEN_HEIGHT * 1.2)
+			self:zoomto(48 * cols, SCREEN_HEIGHT)
 		end
 	},
 	LoadFont("Common Large") .. {
 		Name = "pausetext",
 		InitCommand = function(self)
-			self:xy(wodth/2, SCREEN_HEIGHT/2):draworder(900):zoom(0.5):x(NotefieldPosition)
+			self:xy(wodth/2, SCREEN_HEIGHT/2):draworder(900):zoom(0.5)
 			self:settext(""):diffuse(color("0.8,0,0"))
 			self:shadowlength(1):shadowcolor(0,0,0,1)
 		end,
@@ -183,39 +174,34 @@ local t = Def.ActorFrame {
 		Name = "PosBG",
 		InitCommand = function(self)
 			--self:zoomto(wodth, hidth):halign(0):diffuse(color(".1,.1,.1,1")):draworder(900) -- alt bg for calc info
-			self:zoomto(wodth, hidth):halign(0):diffuse(color("1,1,1,1")):draworder(900):x(ChordDensityThing.SeekPositionX):y(ChordDensityThing.SeekPosY) -- cdgraph bg
+			self:zoomto(wodth, hidth):halign(0):diffuse(color("1,1,1,1")):draworder(900) -- cdgraph bg
 		end,
 		HighlightCommand = function(self)	-- use the bg for detection but move the seek pointer -mina
-			if isOver(self) and GAMESTATE:GetCurrentSteps() ~= nil then
+			if isOver(self) then
 				local seek = self:GetParent():GetChild("Seek")
 				local seektext = self:GetParent():GetChild("Seektext")
 				local seekbg = self:GetParent():GetChild("SeekBG")
 				local cdg = self:GetParent():GetChild("ChordDensityGraph")
-				local fix = self:GetParent():GetChild("SeekFixIthink")
-				
-				--this is so fucking bad fucj you mina
-				fix:visible(false)
+
 				seek:visible(true)
 				seektext:visible(true)
 				seekbg:visible(true)
-
 				seek:x(INPUTFILTER:GetMouseX() - self:GetParent():GetX())
-				fix:x(INPUTFILTER:GetMouseX() - self:GetParent():GetX() - ChordDensityThing.SeekPositionX) --i don't understand how putting the chord coord makes it work again ??????????? -ifwas
-				seektext:x(INPUTFILTER:GetMouseX() - self:GetParent():GetX() - 4)	-- todo: refactor this lmao -mina
+				seektext:x(INPUTFILTER:GetMouseX() - self:GetParent():GetX() - 4)	-- todo: put this in tooltip mayhaps
 				seektext:y(INPUTFILTER:GetMouseY() - self:GetParent():GetY())
 				seekbg:x(INPUTFILTER:GetMouseX() - self:GetParent():GetX() - 25)
 				seekbg:y(INPUTFILTER:GetMouseY() - self:GetParent():GetY() + 15)
 
 				if cdg.npsVector ~= nil and #cdg.npsVector > 0 then
-					local percent = clamp((INPUTFILTER:GetMouseX() - self:GetParent():GetX() - ChordDensityThing.SeekPositionX) / wodth, 0, 1)
-					local xtime = SecondsToMMSS(fix:GetX() * musicratio / getCurRateValue())
+					local percent = clamp((INPUTFILTER:GetMouseX() - self:GetParent():GetX()) / wodth, 0, 1)
+					local xtime = SecondsToMMSS(seek:GetX() * musicratio / getCurRateValue())
 					local hoveredindex = clamp(math.ceil(cdg.finalNPSVectorIndex * percent), math.min(1, cdg.finalNPSVectorIndex), cdg.finalNPSVectorIndex)
 					local hoverednps = cdg.npsVector[hoveredindex]
 					local td = GAMESTATE:GetCurrentSteps():GetTimingData()
-					local bpm = td:GetBPMAtBeat(td:GetBeatFromElapsedTime(fix:GetX() * musicratio)) * getCurRateValue()
+					local bpm = td:GetBPMAtBeat(td:GetBeatFromElapsedTime(seek:GetX() * musicratio)) * getCurRateValue()
 					seektext:settextf("%s\n%d %s\n%d %s", xtime, hoverednps, translated_info["NPS"], bpm, translated_info["BPM"])
 				else
-					seektext:settextf("%0.2f", fix:GetX() * musicratio / getCurRateValue())
+					seektext:settextf("%0.2f", seek:GetX() * musicratio / getCurRateValue())
 				end
 
 				updateCalcInfoDisplays(self)
@@ -231,7 +217,7 @@ local t = Def.ActorFrame {
 	Def.Quad {
 		Name = "Pos",
 		InitCommand = function(self)
-			self:zoomto(0, hidth):diffuse(color("0,1,0,.5")):halign(0):draworder(900):x(ChordDensityThing.SeekPositionX):y(ChordDensityThing.SeekPosY)
+			self:zoomto(0, hidth):diffuse(color("0,1,0,.5")):halign(0):draworder(900)
 		end
 	}
 }
@@ -239,32 +225,22 @@ local t = Def.ActorFrame {
 t[#t + 1] = LoadActor("_chorddensitygraph.lua")
 t[#t + 1] = LoadActor("_calcdisplay.lua")
 
---if you delete this the text on the hovered time will be so incorrect that it'll add 9 minutes or some shit
-t[#t + 1] = UIElements.QuadButton(1, 1) .. {
-	Name = "SeekFixIthink",
-	InitCommand = function(self)
-		self:zoomto(2, hidth):diffuse(color("1,.2,.5,0")):halign(0.5):draworder(1100)
-	end
-}
-
-
-
 -- more draw order shenanigans
 t[#t + 1] = LoadFont("Common Normal") .. {
 	Name = "Seektext",
 	InitCommand = function(self)
-		self:x(ChordDensityThing.SeektextPosX):y(8):valign(0):halign(1):draworder(1100):zoom(0.45)
+		self:y(8):valign(0):halign(1):draworder(1100):zoom(0.4)
 	end
 }
 
 t[#t + 1] = UIElements.QuadButton(1, 1) .. {
 	Name = "Seek",
 	InitCommand = function(self)
-		self:zoomto(2, hidth):diffuse(color("1,.2,.5,1")):halign(0.5):draworder(1100):x(ChordDensityThing.SeekPositionX):y(ChordDensityThing.SeekPosY)
+		self:zoomto(2, hidth):diffuse(color("1,.2,.5,1 ")):halign(0.5):draworder(1100)
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
-			SCREENMAN:GetTopScreen():SetSampleMusicPosition( (self:GetX() - ChordDensityThing.SeekPositionX) * musicratio )
+			SCREENMAN:GetTopScreen():SetSampleMusicPosition( self:GetX() * musicratio )
 		end
 	end
 }

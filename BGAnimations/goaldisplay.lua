@@ -110,7 +110,7 @@ local o = Def.ActorFrame {
 	Def.Quad {
 		Name = "FrameDisplay",
 		InitCommand = function(self)
-			self:zoomto(width, height - headeroff):halign(0):valign(0):diffuse(getMainColor("tabs"))
+			self:zoomto(width, height - headeroff):halign(0):valign(0):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end
 	},
 	-- headers

@@ -7,8 +7,8 @@ local t = Def.ActorFrame {
 }
 
 local EventVolumeControl = false
-local bgThingX = SCREEN_CENTER_X + 270
-local bgThingY = SCREEN_CENTER_Y + 170
+local bgThingX = SCREEN_CENTER_X
+local bgThingY = SCREEN_CENTER_Y
 local VolumeIndicator
 
 local VolumeThing = 100
@@ -39,13 +39,13 @@ t[#t+1] = Def.ActorFrame {
     Def.Quad {
         Name = "BG",
         InitCommand = function(self)
-            self:xy(SCREEN_CENTER_X + capWideScale(get43size(255),270), SCREEN_CENTER_Y + 170)
-            self:zoomto(250, 50)
+            self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y)
+            self:zoomto(250, 40)
             self:diffuse(getMainColor("tabs")):diffusealpha(0)
         end,
         volumeChangedMessageCommand = function(self)
             self:stoptweening()
-            self:smooth(0.3):diffusealpha(1):sleep(0.1):smooth(0.3):smooth(0.2):diffusealpha(0)
+            self:smooth(0.3):diffusealpha(0.5):sleep(0.1):smooth(0.3):smooth(0.2):diffusealpha(0)
         end,
     },
 }
@@ -55,7 +55,7 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Normal") .. {
     Name = "Name",
     InitCommand = function(self)
         self:halign(0)
-        self:xy(SCREEN_CENTER_X + capWideScale(get43size(148),180), SCREEN_CENTER_Y + 160):diffusealpha(0)
+        self:xy(SCREEN_CENTER_X - 98, SCREEN_CENTER_Y - 4):diffusealpha(0)
         self:zoom(0.65)
         self:maxwidth(capWideScale(360,800))
         self:maxheight(22)
@@ -104,7 +104,7 @@ t[#t+1] = Def.ActorFrame {
         Name = "BG",
         InitCommand = function(self)
             self:halign(0)
-            self:xy(SCREEN_CENTER_X + capWideScale(get43size(106),150), SCREEN_CENTER_Y + 180)
+            self:xy(SCREEN_CENTER_X - 118, SCREEN_CENTER_Y + 12)
             self:zoomto(235 * curGameVolume, 2)
             self:diffuse(getMainColor("positive"))
             self:diffusealpha(0)
@@ -123,8 +123,8 @@ t[#t+1] = Def.ActorFrame {
         Name = "volumeicon",
         Texture=THEME:GetPathG("","volume");
         InitCommand = function(self)
-            self:xy(SCREEN_CENTER_X + capWideScale(get43size(120),164), SCREEN_CENTER_Y + 160):diffusealpha(0)
-            self:zoom(0.45)
+            self:xy(SCREEN_CENTER_X - 110, SCREEN_CENTER_Y - 4):diffusealpha(0)
+            self:zoom(0.25)
         end,
         volumeChangedMessageCommand = function(self)
             self:stoptweening()

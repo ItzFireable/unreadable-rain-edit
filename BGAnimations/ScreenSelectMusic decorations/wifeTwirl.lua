@@ -335,14 +335,26 @@ local t = Def.ActorFrame {
 		end,
 		0.05)
 	end,
-	Def.Quad {
-		InitCommand = function(self)
-			self:xy(frameX, frameY - 146):zoomto(110, 164):halign(0):valign(0):diffuse(getMainColor("tabs"))
+	LoadActor(THEME:GetPathG("", "tylerbody")) ..
+	{
+		OnCommand = function(self)
+			self:xy(240, 208):zoomto(150, 150):align(0,0):diffuse(getMainColor("positive"))
+		end
+	},
+	LoadActor(THEME:GetPathG("", "tylerhead")) ..
+	{
+		OnCommand = function(self)
+			self:xy(240, 208):zoomto(150, 150):align(0,0)
 		end
 	},
 	Def.Quad {
 		InitCommand = function(self)
-			self:xy(frameX, frameY + 18):zoomto(frameWidth + 4, 50):halign(0):valign(0):diffuse(getMainColor("tabs"))
+			self:xy(frameX, frameY - 146):zoomto(110, 164):halign(0):valign(0):diffuse(getMainColor("tabs")):diffusealpha(0.7)
+		end
+	},
+	Def.Quad {
+		InitCommand = function(self)
+			self:xy(frameX, frameY + 18):zoomto(frameWidth + 4, 50):halign(0):valign(0):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end
 	},
 	Def.Quad {
@@ -1140,6 +1152,14 @@ t[#t + 1] = Def.ActorFrame {
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" and (song or noteField) then
 				toggleNoteField()
+			elseif params.event == "DeviceButton_right mouse button" and (song or noteField) then
+				if mcbootlarder:IsVisible() then
+					toggleCalcInfo(not infoOnScreen)
+				else
+					if toggleNoteField() then
+						toggleCalcInfo(true)
+					end
+				end
 			end
 		end,
 		ChartPreviewOnMessageCommand = function(self)

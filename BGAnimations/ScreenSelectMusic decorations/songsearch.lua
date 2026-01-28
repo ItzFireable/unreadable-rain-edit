@@ -120,7 +120,7 @@ local t = Def.ActorFrame {
 	},
 	Def.Quad {
 		InitCommand = function(self)
-			self:xy(frameX - capWideScale(3.5,-3.5), frameY - 46):zoomto(capWideScale(362.5,472), 44):align(0,0.5):diffuse(getMainColor("tabs"))
+			self:xy(frameX - capWideScale(3.5,-3.5), frameY - 46):zoomto(capWideScale(362.5,472), 44):align(0,0.5):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end,
 	},
 	LoadFont("Common Large") .. {

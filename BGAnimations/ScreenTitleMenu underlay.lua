@@ -2,178 +2,6 @@ if IsSMOnlineLoggedIn() then
 	CloseConnection()
 end
 
-local minanyms = {
-	"welcome back cheater",
-	"Unreadable Rain",
-	"the logorrhea of yore",
-	"Irate Platypusaurusean",
-	"Pancreatic_MilkTrombone",
-	"Fire_Elevator",
-	"Starchy DarkButter",
-	"Unememorabelia Bedelia",
-	"Cheezits 'N Rice",
-	"Scalding brain fart",
-	"Luridescence",
-	"Frothy Loin",
-	"Ministry of Silly Steps",
-	"\na haiku for man\ntried to prove that we're special\nturns out that we're not",
-	"BinkleBompFOUR[emdash]",
-	"an astounding lack of self awareness (Mina 1:78)",
-	"the changelog that answers your question\nyou know the one you didn't read",
-	"the profile names of yore",
-	"mystic memer",
-	"orange hands",
-	"Sir Smauggy",
-	"ScroogeMcdoot",
-	"The King In The Hall Under The Mountain Amidst The Dragon's Lair",
-	"Just Mash",
-	"Just 5mash",
-	"Player 1",
-	"Minametra",
-	"Noodlesim",
-	"Default Profile",
-	"Mina (backup)",
-	"Mina",
-	"orange hands (backup)",
-	"Don Eon",
-	"Tromwelskintherintherin",
-	"StraitStrix",
-	"UmbralChord",
-	"NoSaucierMagic",
-	"EgomaniaCircus",
-	"stepmania bakery hero",
-	"infinite swirling squid spacecraft",
-	"Jack Can't Reacher",
-	"the nightly builds of yore",
-	"AVAST YE STEPMATEY",
-	"ALPHA DINGOBABY",
-	"TOWEL FOR A PHOENIX",
-	"MAYBE ITS RASPBELLINE",
-	"FREE MARKOV",
-	"BARK ON MOONSTRING",
-	"CARAMEL CANDELABRABELLUM",
-	"PATENTED TOILET MYTHOS",
-	"MOONAR LANDING - THE RETURWN",
-	"ORANGE BLOSSOM SPECIAL",
-	"SERENADE UNDER PORCUPINE",
-	"SERRATED HAMBURGER",
-	"INTERGALACTIC TURKEY",
-	"TURTLE LOVE",
-	"BICYCLE LAUGH",
-	"GODLY PLATE OF THE WHALE",
-	"PURPLE PARKING METERSTICK",
-	"BROCCOLI MOISTURIZER",
-	"SLIGHTLY ALTERED COMPILER FLAG",
-	"PARTIALLY Q-TIP KIWI",
-	"POTATO PAINTING COURTESY",
-	"Ye olde names",
-	"Shoeeater9000",
-	"Thirdeye",
-	"Otiose Velleity",
-	"MoreLikeYourMomesis",
-	"RofflesTheCat",
-	"MinaEnnui",
-	"FishnaciousGrace",
-	"Forp",
-	"Forp II",
-	"Forp III The Unavenged",
-	"Lady Mericicelourne Ciestrianna De'anstrasvazanne",
-	"Caecita",
-	"Tempestress",
-	"unself",
-	"DefinitelyNotMina",
-	"KillerClown",
-	"Quirky Colonel Kibbles",
-	"2c",
-	"FroggerNanny",
-	"FroggyNanner",
-	"Aeristacicianistriaza",
-	"FroggerNanny The Unfrogged",
-	"ScatPlayKatarina",
-	"Ferric Chloride Matter",
-	"Bananatiger",
-	"Unapologetically Hostile Entity",
-	"Perpetual Sarcasm Dispensary",
-	"dehydrated mandelbrot pulsar",
-	"desires a pink anime avatar",
-	"theamishwillneverseethis.jpg",
-	"Restore missing legacy Stepmania Team credits #1588",
-	"gratuitous double negative usage",
-	"MinaTallerThanBrandon",
-	"confers monetary value to words",
-	"notcool",
-	"mina restepped as a pad file",
-	"sapient typo conglomerate",
-	"Real Stepmania Client",
-	"Paraplebsis",
-	"Qlwpdrt ~!- V~!@#B",
-	"HypophoraticProcatalepsis",
-	"WobblyChickenRepeat",
-	"RoundTableTigerSwan",
-	"SkeleTotemWalkRedux",
-	"TinkleTotemJamboree",
-	"LerpNurbs",
-	"HerpingDerper",
-	"MinaHatesYouYesYou",
-	"ImaginaryStepmaniaClient",
-	"ExtraLunarTangoFoxtrot",
-	"Morbid Papaya Matrix",
-	"note pink",
-	"borp",
-	"stringofcharactersyouwillonlyseeifitsindexisselectedbytheprngfunctionusedtochoosefromthetableitshousedin",
-	"b&",
-	"oxford semicolon",
-	"more bugs added than fixed",
-	"mr.takesallthecreditdoesnoneofthework",
-	"Inappropriately placed political message that prompts angry responses on the internet",
-	"phalangeography platform for moonlight vigil",
-	"Only positive chirps",
-	"queen it use duk amok",
-	"place mine mode",
-	"G-BR0LEH",
-	"/L.-:]/",
-	"Gumbo",
-	"MinaWurtemBurglar",
-	"MinaBurtemWurglar",
-	"Irreverent irrelevance",
-	"Solipsism is just existential masturbation",
-	"So is simulation theory, only dumber",
-	"5.3.0 Silver Alpha 4.5 – April 4, 2020",
-	"logic riddle 4 u",
-	"You must own all the rights or have the right to use ANY content you upload - quaver upload rules",
-	"Astrasza",
-	"Eacylisce",
-	"farts mcpoopyface",
-	"Laser beef can radio remix",
-	"b151f00c59ed323e188bb676ac1e8cb0162ee59a",
-	"borpndorf",
-	"strings and beans",
-	"really big toenails mcstabyouwithem",
-	"slayers_jukeboxer",
-	"the Feen",
-	"Minanym",
-	"table point hoarder",
-	"yes and no",
-	"unconjoined juxtaposition",
-	"cancerous snake",
-	"1:46 snufkin",
-	"MinaMinaCloneClone",
-	"Rainbow Accept",
-	"for optimizzles",
-	"poodle_in_a_porta_potty",
-	"scoring justice warrior",
-	"_ring.png",
-	"cosmically infinite bullshit nova",
-	"erudite napkin",
-	"ban dripwarrior",
-	"dripwarrior banned",
-	"snorf AEPLUS bcborf",
-	"ulbu, the great bazoinkazoink in the sky",
-	"nice old calc",
-}
-
-math.random()
-
 local t = Def.ActorFrame {}
 
 --thing made by dashdash, what a surprise, unreadable rain now has actual rain
@@ -218,12 +46,12 @@ local playingMusicCounter = 1
 --Title text
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	InitCommand=function(self)
-		self:xy(capWideScale(get43size(410),180),frameY-120):zoom(0.65):align(0,1)
+		self:xy(290,frameY-120):zoom(0.7):align(0.5,1)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
 	OnCommand=function(self)
-		self:settext(minanyms[math.random(#minanyms)])
+		self:settext("Welcome back!")
 	end,
 	MouseOverCommand = function(self)
 		self:diffusealpha(0.6)
@@ -279,7 +107,7 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 --Theme text
 t[#t + 1] = LoadFont("Common Large") .. {
 	InitCommand=function(self)
-		self:xy(capWideScale(get43size(230),180),frameY-105):zoom(0.25):halign(0,1)
+		self:xy(195,frameY-110):zoom(0.25):halign(0.5,1)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
@@ -291,12 +119,12 @@ t[#t + 1] = LoadFont("Common Large") .. {
 --Theme ver
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	InitCommand=function(self)
-		self:xy(SCREEN_LEFT + 1,SCREEN_BOTTOM - 23):zoom(0.25):halign(0)
+		self:xy(SCREEN_LEFT + 4,SCREEN_BOTTOM - 20):zoom(0.25):halign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
 	OnCommand=function(self)
-		self:settext("Unredable Rain 1.8")
+		self:settext("Unreadable Rain (Custom)")
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
@@ -307,7 +135,7 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 --Etterna ver
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	InitCommand=function(self)
-		self:xy(SCREEN_LEFT,SCREEN_BOTTOM - 35):zoom(0.25):halign(0)
+		self:xy(SCREEN_LEFT + 4,SCREEN_BOTTOM - 8):zoom(0.25):halign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
@@ -317,25 +145,6 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
 			DLMAN:ShowProjectReleases()
-		end
-	end
-}
-
-
-t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	Name = "geometrydash",
-	InitCommand=function(self)
-		self:xy(SCREEN_LEFT + 1,SCREEN_BOTTOM - 15):zoom(0.25):halign(0):valign(0)
-		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
-		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
-	end,
-	BeginCommand = function(self)
-		self:settext("Check out more themes on Martzi's repo")
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			Arch.setClipboardText("https://sectofmysticwisdom.com/etternathemerepo") --prob doesn't work on linux 
-			ms.ok("Link Copied Succesfully!")
 		end
 	end
 }

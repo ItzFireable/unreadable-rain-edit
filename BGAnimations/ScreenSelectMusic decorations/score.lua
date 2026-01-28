@@ -371,7 +371,7 @@ local t = Def.ActorFrame {
 	Def.Quad {
 		Name = "FrameDisplay",
 		InitCommand = function(self)
-			self:zoomto(frameWidth, frameHeight):halign(0):valign(0):diffuse(getMainColor("tabs"))
+			self:zoomto(frameWidth, frameHeight):halign(0):valign(0):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end,
 		CollapseCommand = function(self)
 			self:visible(false)

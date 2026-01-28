@@ -1,7 +1,7 @@
 -- Various player and stage info, more text = fps drop so we should be sparing
 local profileP1 = GetPlayerOrMachineProfile(PLAYER_1)
-local PlayerFrameX = 0
-local PlayerFrameY = SCREEN_HEIGHT - 50
+local PlayerFrameX = 8
+local PlayerFrameY = SCREEN_HEIGHT - 58
 local bgalpha = PREFSMAN:GetPreference("BGBrightness")
 
 local translated_info = {
@@ -25,17 +25,17 @@ local t = Def.ActorFrame {
 	},
 	Def.Sprite {
 		InitCommand = function(self)
-			self:halign(0):valign(0):xy(PlayerFrameX, PlayerFrameY)
+			self:halign(0):valign(0):xy(PlayerFrameX, PlayerFrameY + 2)
 		end,
 		BeginCommand = function(self)
 			self:finishtweening()
 			self:Load(getAvatarPath(PLAYER_1))
-			self:zoomto(50, 50)
+			self:zoomto(48, 48)
 		end
 	},
 	LoadFont("Common Large") .. {
 		InitCommand = function(self)
-			self:xy(PlayerFrameX + 90, PlayerFrameY + 24.5):halign(0):zoom(0.4):maxwidth(140):diffuse(getMainColor("positive"))
+			self:xy(PlayerFrameX + 100, PlayerFrameY + 32):halign(0):zoom(0.35):maxwidth(140):diffuse(getMainColor("positive"))
 		end,
 		SetCommand = function(self)
 			self:settext(getDifficulty(GAMESTATE:GetCurrentSteps():GetDifficulty()))
@@ -54,7 +54,7 @@ local t = Def.ActorFrame {
 	},
 	LoadFont("Common Large") .. {
 		InitCommand = function(self)
-			self:xy(PlayerFrameX + 52, PlayerFrameY + 30):halign(0):zoom(0.75):maxwidth(50)
+			self:xy(PlayerFrameX + 52, PlayerFrameY + 38):halign(0):zoom(0.7):maxwidth(64)
 		end,
 		SetCommand = function(self)
 			local meter = GAMESTATE:GetCurrentSteps():GetMSD(getCurRateValue(), 1)
@@ -73,27 +73,23 @@ local t = Def.ActorFrame {
 	},
 	LoadFont("Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(PlayerFrameX + 91, PlayerFrameY + 40):halign(0):zoom(0.4):maxwidth(SCREEN_WIDTH * 0.8)
+			self:xy(PlayerFrameX + 100, PlayerFrameY + 46):halign(0):zoom(0.4):maxwidth(SCREEN_WIDTH * 0.5)
 		end,
 		BeginCommand = function(self)
-			self:settext(getModifierTranslations(GAMESTATE:GetPlayerState():GetPlayerOptionsString("ModsLevel_Current")))
+			self:settextf("%s, J%d", getModifierTranslations(GAMESTATE:GetPlayerState():GetPlayerOptionsString("ModsLevel_Current")), GetTimingDifficulty())
 		end
 	},
 	LoadFont("Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(PlayerFrameX + 53, PlayerFrameY - 4):halign(0):zoom(0.45)
+			self:xy(PlayerFrameX + 52, PlayerFrameY + 14):halign(0):zoom(0.75)
 		end,
 		BeginCommand = function(self)
-			self:settextf("%s: %d", translated_info["Judge"], GetTimingDifficulty())
+			-- set player name
+			local pname = PROFILEMAN:GetPlayerName(PLAYER_1)
+			if pname ~= "" then
+				self:settext(pname)
+			end
 		end
 	},
-	LoadFont("Common Normal") .. {
-		InitCommand = function(self)
-			self:xy(PlayerFrameX + 53, PlayerFrameY + 9):halign(0):zoom(0.45)
-		end,
-		BeginCommand = function(self)
-			self:settextf("%s: %s", translated_info["Scoring"], scoringToText(4))
-		end
-	}
 }
 return t

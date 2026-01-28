@@ -11,7 +11,7 @@ local playCount = 0
 local playTime = 0
 local noteCount = 0
 local numfaves = 0
-local AvatarX = 0
+local AvatarX = 4
 local AvatarY = SCREEN_HEIGHT - 50
 local playerRating = 0
 local uploadbarwidth = 100
@@ -75,7 +75,10 @@ local function UpdateTime(self)
 
 	local sessiontime = GAMESTATE:GetSessionTime()
 	self:GetChild("SessionTime"):settextf("%s: %s", translated_info["SessionTime"], SecondsToHHMMSS(sessiontime))
-	self:diffuse(nonButtonColor)
+	
+	local playtime = profile:GetTotalSessionSeconds()
+	self:GetChild("Playtime"):settextf("%s: %s", translated_info["Playtime"], SecondsToHHMMSS(playtime))
+	self:diffuse(ButtonColor)
 end
 
 -- handle logging in
@@ -196,7 +199,7 @@ t[#t + 1] = Def.ActorFrame {
 		ModifyAvatarCommand = function(self)
 			self:finishtweening()
 			self:Load(getAvatarPath(PLAYER_1))
-			self:zoomto(50, 50)
+			self:zoomto(46, 46)
 		end,
 		MouseDownCommand = function(self, params)
 			if params.event == "DeviceButton_left mouse button" and not SCREENMAN:get_input_redirected(PLAYER_1) then
@@ -209,8 +212,8 @@ t[#t + 1] = Def.ActorFrame {
 		Name = "Name",
 		InitCommand = function(self)
 			self:halign(0)
-			self:xy(AvatarX + 54, AvatarY + 8)
-			self:zoom(0.55)
+			self:xy(AvatarX + 50, AvatarY + 5)
+			self:zoom(0.45)
 			self:maxwidth(capWideScale(360,500))
 			self:maxheight(22)
 			self:diffuse(ButtonColor)
@@ -244,7 +247,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "loginlogout",
 		InitCommand = function(self)
-			self:xy(AvatarX + 55, SCREEN_BOTTOM - 10):halign(0):zoom(0.45):diffuse(ButtonColor)
+			self:xy(AvatarX + 50, SCREEN_BOTTOM - 8):halign(0):zoom(0.3):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -320,7 +323,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "LoggedInAs",
 		InitCommand = function(self)
-			self:xy(AvatarX + 55, AvatarY + 24):halign(0):zoom(0.5):diffuse(ButtonColor)
+			self:xy(AvatarX + 50, AvatarY + 19):halign(0):zoom(0.35):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -365,7 +368,7 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_CENTER_X - capWideScale(125,75), AvatarY + 41):halign(0.5):zoom(0.4):diffuse(ButtonColor)
+			self:xy(SCREEN_CENTER_X - 6, SCREEN_BOTTOM - 8):halign(1):zoom(0.3):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -375,7 +378,6 @@ t[#t + 1] = Def.ActorFrame {
 		end,
 		SetCommand = function(self)
 			local online = IsNetSMOnline() and IsSMOnlineLoggedIn() and NSMAN:IsETTP()
-			self:y(AvatarY + 41 - (online and 18 or 0))
 			self:settextf("%s: %s", translated_info["Judge"], GetTimingDifficulty())
 		end,
 		MouseOverCommand = function(self)
@@ -408,7 +410,7 @@ t[#t + 1] = Def.ActorFrame {
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		Name = "Version",
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, AvatarY + 8):halign(1):zoom(0.42):diffuse(ButtonColor)
+			self:xy(SCREEN_WIDTH - 3, AvatarY + 5):halign(1):zoom(0.45):diffuse(ButtonColor)
 		end,
 		BeginCommand = function(self)
 			self:queuecommand("Set")
@@ -453,37 +455,56 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	UIElements.TextToolTip(1, 1, "Common Normal") .. {
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, AvatarY + 30):halign(1):zoom(0.41):diffuse(nonButtonColor)
+			self:xy(SCREEN_WIDTH - 4, AvatarY + 33):halign(1):valign(1):zoom(0.35):diffuse(ButtonColor)
 			self:settext("Random Song")
 		end,
-    MouseOverCommand = function(self)
-		self:diffusealpha(hoverAlpha)
-	end,
-	MouseOutCommand = function(self)
-		self:diffusealpha(1)
-	end,
-	MouseDownCommand = function(self, params)
-		if params.event == "DeviceButton_left mouse button" then
-			local w = SCREENMAN:GetTopScreen():GetMusicWheel()
+		MouseOverCommand = function(self)
+			self:diffusealpha(hoverAlpha)
+		end,
+		MouseOutCommand = function(self)
+			self:diffusealpha(1)
+		end,
+		MouseDownCommand = function(self, params)
+			if params.event == "DeviceButton_left mouse button" then
+				local w = SCREENMAN:GetTopScreen():GetMusicWheel()
 
-			if INPUTFILTER:IsShiftPressed() and self.lastlastrandom ~= nil then
+				if INPUTFILTER:IsShiftPressed() and self.lastlastrandom ~= nil then
 
-				-- if the last random song wasnt filtered out, we can select it
-				-- so end early after jumping to it
-				if w:SelectSong(self.lastlastrandom) then
-					return
+					-- if the last random song wasnt filtered out, we can select it
+					-- so end early after jumping to it
+					if w:SelectSong(self.lastlastrandom) then
+						return
+					end
+					-- otherwise, just pick a new random song
 				end
-				-- otherwise, just pick a new random song
-			end
 
-			local t = w:GetSongs()
-			if #t == 0 then return end
-			local random_song = t[math.random(#t)]
-			w:SelectSong(random_song)
-			self.lastlastrandom = self.lastrandom
-			self.lastrandom = random_song
+				local t = w:GetSongs()
+				if #t == 0 then return end
+				local random_song = t[math.random(#t)]
+				w:SelectSong(random_song)
+				self.lastlastrandom = self.lastrandom
+				self.lastrandom = random_song
+			end
 		end
-	end
+	},
+	UIElements.TextToolTip(1, 1, "Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(SCREEN_CENTER_X - 6, AvatarY + 19):halign(1):zoom(0.35):diffuse(ButtonColor)
+		end,
+		SetCommand = function(self)
+			self:settextf("%s: %i", translated_info["SongsLoaded"], SONGMAN:GetNumSongs())
+		end,
+	},
+	LoadFont("Common Normal") .. {
+		InitCommand = function(self)
+			self:xy(SCREEN_CENTER_X - 6, AvatarY + 5):halign(1):zoom(0.45):diffuse(ButtonColor)
+		end,
+		BeginCommand = function(self)
+			self:queuecommand("Set")
+		end,
+		SetCommand = function(self)
+			self:settextf("%s: %s", translated_info["TapsHit"], noteCount)
+		end
 	},
 	-- ok coulda done this as a separate object to avoid copy paste but w.e
 	-- upload progress bar bg
@@ -571,14 +592,21 @@ t[#t + 1] = Def.ActorFrame {
 	LoadFont("Common Normal") .. {
 		Name = "CurrentTime",
 		InitCommand = function(self)
-			self:xy(SCREEN_WIDTH - 3, SCREEN_BOTTOM - 3.5):halign(1):valign(1):zoom(0.45)
+			self:xy(SCREEN_WIDTH - 4, SCREEN_BOTTOM - 8):halign(1):zoom(0.3)
 		end
 	},
 
 	LoadFont("Common Normal") .. {
 		Name = "SessionTime",
 		InitCommand = function(self)
-			self:xy(AvatarX + 155, SCREEN_BOTTOM - 5):halign(0):valign(1):zoom(0.45)
+			self:xy(SCREEN_CENTER_X - 6, AvatarY + 33):halign(1):valign(1):zoom(0.35)
+		end
+	},
+
+	LoadFont("Common Normal") .. {
+		Name = "Playtime",
+		InitCommand = function(self)
+			self:xy(AvatarX + 50, AvatarY + 33):halign(0):valign(1):zoom(0.35)
 		end
 	}
 }

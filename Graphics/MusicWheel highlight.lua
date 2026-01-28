@@ -2,7 +2,7 @@ return Def.ActorFrame {
 	Def.Quad {
 		Name = "Horizontal",
 		InitCommand = function(self)
-			self:xy(0, -2):zoomto(854, 34):halign(0)
+			self:xy(0, -2):zoomto(854, 38):halign(0)
 		end,
 		SetCommand = function(self)
 			self:diffuseramp()

@@ -180,7 +180,7 @@ local o = Def.ActorFrame {
 	UIElements.QuadButton(1, 1) .. {-- this is a nonfunctional button to mask buttons behind the window
 		Name = "FrameDisplay",
 		InitCommand = function(self)
-			self:zoomto(width, height - headeroff):halign(0):valign(0):diffuse(getMainColor("tabs"))
+			self:zoomto(width, height - headeroff):halign(0):valign(0):diffuse(getMainColor("tabs")):diffusealpha(0.7)
 		end,
 		MouseRightClickMessageCommand = function(self)
 			if isOver(self) and not collapsed then

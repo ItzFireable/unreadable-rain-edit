@@ -13,11 +13,11 @@ t[#t + 1] = Def.ActorFrame {
 
 					local mx = SCREEN_WIDTH - INPUTFILTER:GetMouseX()
 					local my = SCREEN_HEIGHT - INPUTFILTER:GetMouseY()
-					if mx < 32 and mx > 0 and my < 442 and my > 48 then
+					if mx < 16 and mx > 0 and my < 442 and my > 48 then
 						self:SetUpdateFunction(function(self)
 							local mx = SCREEN_WIDTH - INPUTFILTER:GetMouseX()
 							local my = SCREEN_HEIGHT - INPUTFILTER:GetMouseY()
-							if moving or mx < 32 and mx > 0 and my < 442 and my > 48 then
+							if moving or mx < 16 and mx > 0 and my < 442 and my > 48 then
 								moving = true
 								self:playcommand("ClickingMusicWheelScroller")
 							end
@@ -35,7 +35,7 @@ t[#t + 1] = Def.ActorFrame {
 	Def.Quad {
 		Name = "DootyMcBooty",
 		BeginCommand = function(self)
-			self:zoomto(32, 32):valign(0.634522134234)
+			self:zoomto(16, 32):valign(0.634522134234)
 			screname = SCREENMAN:GetTopScreen():GetName()
 			if screname == "ScreenSelectMusic" or screname == "ScreenNetSelectMusic" then
 				whee = SCREENMAN:GetTopScreen():GetMusicWheel()

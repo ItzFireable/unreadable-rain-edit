@@ -6,7 +6,7 @@ return Def.ActorFrame {
 		InitCommand = function(self)
 			self:halign(0)
 			self:xy(0,0)
-			self:diffusealpha(0)
+			self:diffuse(getMainColor("tabs")):diffusealpha(0.25)
 			self:zoomto(854, 38)
 		end,
         SetCommand = function(self, params)

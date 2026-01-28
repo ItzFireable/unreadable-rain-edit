@@ -155,15 +155,13 @@ t[#t + 1] =
 t[#t + 1] =
 	Def.Quad {
 	InitCommand = function(self)
-		self:xy(0, 0):halign(0):valign(0):zoomto(SCREEN_WIDTH, topFrameHeight):diffuse(color("#000000"))
+		self:xy(0, 0):halign(0):valign(0):zoomto(SCREEN_WIDTH, topFrameHeight):diffuse(color("#000000")):diffusealpha(0.7)
 	end
 }
 t[#t + 1] =
 	Def.Quad {
 	InitCommand = function(self)
-		self:xy(0, topFrameHeight):halign(0):valign(1):zoomto(SCREEN_WIDTH, borderWidth):diffuse(getMainColor("highlight")):diffusealpha(
-			0.5
-		)
+		self:xy(0, topFrameHeight):halign(0):valign(1):zoomto(SCREEN_WIDTH, borderWidth):diffuse(getMainColor("highlight")):diffusealpha(0.7)
 	end
 }
 
@@ -171,7 +169,7 @@ t[#t + 1] =
 	LoadFont("Common Large") ..
 	{
 		InitCommand = function(self)
-			self:xy(5, 32):halign(0):valign(1):zoom(0.55):diffuse(getMainColor("positive"))
+			self:xy(5, 24):halign(0):valign(1):zoom(0.45):diffuse(getMainColor("positive"))
 			self:settextf("%s:", THEME:GetString("ScreenPlayerOptions", "Title"))
 		end
 	}
