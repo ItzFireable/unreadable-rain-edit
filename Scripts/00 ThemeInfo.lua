@@ -1,9 +1,9 @@
 -- theme identification file
 
 themeInfo = {
-	Name = "'Til Death",
-	Version = "1.11",
-	Date = "20250111"
+	Name = "Unreadable Rain",
+	Version = "1.0",
+	Date = "20260128"
 }
 
 function getThemeName()

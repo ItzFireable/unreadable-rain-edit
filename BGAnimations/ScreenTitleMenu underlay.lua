@@ -3,36 +3,82 @@ if IsSMOnlineLoggedIn() then
 end
 
 local t = Def.ActorFrame {}
+local randomShit = {
+	"just mash",
+	"pausing is cheating",
+	"offset is wrong",
+	"keyboard abuse",
+	"rate 1.1x?",
+	"acc player?",
+	"arrows only",
+	"don't mind me",
+	"loading...",
+	"fingers hurt yet?",
+	"retry retry retry",
+	"cb: 0",
+	"blackflag",
+	"wife3 when?",
+	"average 4k player",
+	"index player detected",
+	"spread player detected",
+	"mechanical switches only",
+	"your z key is broken",
+	"stop mashing",
+	"manipulator",
+	"vibro check",
+	"streaming 300bpm",
+	"minijack hell",
+	"chordjack enjoyment",
+	"stamina drain",
+	"handstream only",
+	"dumpstream enthusiast",
+	"technical player",
+	"files from 2005",
+	"stepmania 3.9",
+	"openitg was better",
+	"scroll speed 1000",
+	"cmod or mmod?",
+	"judgement: justice",
+	"marvelous!",
+	"boo",
+	"universal offset 0",
+	"judge 7 or quit",
+	"calc version?",
+	"spawncalc",
+	"recalc scores",
+	"check the wiki",
+}
 
 --thing made by dashdash, what a surprise, unreadable rain now has actual rain
 local rain = function(angle, intensity)
-    local speed = 1 - math.min(intensity, 800) / 2500
-    local t = Def.ActorFrame {}
-    for i = 1, math.min(300, intensity) do
-        t[#t+1] = Def.Quad {
-            InitCommand = function(self)
-                self:queuecommand("Regen")
-            end,
-            RegenCommand = function(self)
-                local where = math.random(-math.abs(angle) * 20,SCREEN_WIDTH + math.abs(angle) * 20)
-                self:sleep(math.random(intensity) / intensity):rotationz(90 + angle):zoomto(intensity / 4,0.6):xy(where,-500):diffuse(Saturation(getMainColor("highlight"), 0.2)):diffusealpha(0.5)
-                self:linear(speed):xy(where - (angle * 30), SCREEN_HEIGHT + 500):queuecommand("Regen")
-            end
-        }
-    end
-    return t
+	local speed = 1 - math.min(intensity, 800) / 2500
+	local t = Def.ActorFrame {}
+	for i = 1, math.min(300, intensity) do
+		t[#t + 1] = Def.Quad {
+			InitCommand = function(self)
+				self:queuecommand("Regen")
+			end,
+			RegenCommand = function(self)
+				local where = math.random(-math.abs(angle) * 20, SCREEN_WIDTH + math.abs(angle) * 20)
+				self:sleep(math.random(intensity) / intensity):rotationz(90 + angle):zoomto(intensity / 4, 0.6):xy(where,
+					-500):diffuse(Saturation(getMainColor("highlight"), 0.2)):diffusealpha(0.5)
+				self:linear(speed):xy(where - (angle * 30), SCREEN_HEIGHT + 500):queuecommand("Regen")
+			end
+		}
+	end
+	return t
 end
 
-t[#t+1] = rain(10, 300)
+t[#t + 1] = rain(10, 300)
 
 local frameX = THEME:GetMetric("ScreenTitleMenu", "ScrollerX") - 10
 local frameY = THEME:GetMetric("ScreenTitleMenu", "ScrollerY")
 
 t[#t + 1] =
-	Def.Sprite{
-		Texture=THEME:GetPathG("","BackgroundTitle/titlebg");
-		InitCommand=function(self)
-			self:xy(SCREEN_CENTER_X,SCREEN_CENTER_Y):zoom(0.4)
+	Def.Sprite {
+		Texture = THEME:GetPathG("", "BackgroundTitle/titlebg"),
+		InitCommand = function(self)
+			self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y):zoom(0.4)
 			self:scaletocover(0, 0, SCREEN_WIDTH, SCREEN_BOTTOM)
 			self:diffusealpha(0.5)
 		end
@@ -40,17 +86,17 @@ t[#t + 1] =
 
 
 
-	
+
 local playingMusic = {}
 local playingMusicCounter = 1
 --Title text
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	InitCommand=function(self)
-		self:xy(290,frameY-120):zoom(0.7):align(0.5,1)
+	InitCommand = function(self)
+		self:xy(290, frameY - 120):zoom(0.7):align(0.5, 1)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
-	OnCommand=function(self)
+	OnCommand = function(self)
 		self:settext("Welcome back!")
 	end,
 	MouseOverCommand = function(self)
@@ -63,7 +109,10 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 		if params.event == "DeviceButton_left mouse button" then
 			local function startSong()
 				local sngs = SONGMAN:GetAllSongs()
-				if #sngs == 0 then ms.ok("No songs to play") return end
+				if #sngs == 0 then
+					ms.ok("No songs to play")
+					return
+				end
 
 				local s = sngs[math.random(#sngs)]
 				local p = s:GetMusicPath()
@@ -75,9 +124,9 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 
 				SOUND:StopMusic()
 				SOUND:PlayMusicPart(p, 0, l)
-	
-				ms.ok("NOW PLAYING: "..s:GetMainTitle() .. " | LENGTH: "..SecondsToMMSS(l))
-	
+
+				ms.ok("NOW PLAYING: " .. s:GetMainTitle() .. " | LENGTH: " .. SecondsToMMSS(l))
+
 				top:setTimeout(
 					function()
 						if not playingMusic[thisSong] then return end
@@ -86,15 +135,14 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 					end,
 					l
 				)
-	
 			end
-	
+
 			SCREENMAN:GetTopScreen():setTimeout(function()
 					playingMusic[playingMusicCounter] = false
 					playingMusicCounter = playingMusicCounter + 1
 					startSong()
 				end,
-			0.1)
+				0.1)
 		else
 			SOUND:StopMusic()
 			playingMusic = {}
@@ -106,25 +154,27 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 
 --Theme text
 t[#t + 1] = LoadFont("Common Large") .. {
-	InitCommand=function(self)
-		self:xy(195,frameY-110):zoom(0.25):halign(0.5,1)
+	InitCommand = function(self)
+		self:xy(172, frameY - 110):zoom(0.25):halign(0, 1)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
-	OnCommand=function(self)
-		self:settext(getThemeName())
+	OnCommand = function(self)
+		-- get a random tip from the tips folder
+		local tip = randomShit[math.random(#randomShit)]
+		self:settext(tip)
 	end
 }
 
 --Theme ver
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	InitCommand=function(self)
-		self:xy(SCREEN_LEFT + 4,SCREEN_BOTTOM - 20):zoom(0.25):halign(0)
+	InitCommand = function(self)
+		self:xy(SCREEN_LEFT + 4, SCREEN_BOTTOM - 20):zoom(0.25):halign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
-	OnCommand=function(self)
-		self:settext("Unreadable Rain (Custom)")
+	OnCommand = function(self)
+		self:settext(getThemeName() .. " " .. getThemeVersion())
 	end,
 	MouseDownCommand = function(self, params)
 		if params.event == "DeviceButton_left mouse button" then
@@ -134,12 +184,12 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 
 --Etterna ver
 t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
-	InitCommand=function(self)
-		self:xy(SCREEN_LEFT + 4,SCREEN_BOTTOM - 8):zoom(0.25):halign(0)
+	InitCommand = function(self)
+		self:xy(SCREEN_LEFT + 4, SCREEN_BOTTOM - 8):zoom(0.25):halign(0)
 		self:diffusetopedge(Saturation(getMainColor("highlight"), 0.5))
 		self:diffusebottomedge(Saturation(getMainColor("positive"), 0.8))
 	end,
-	OnCommand=function(self)
+	OnCommand = function(self)
 		self:settext(GAMESTATE:GetEtternaVersion())
 	end,
 	MouseDownCommand = function(self, params)
@@ -151,10 +201,10 @@ t[#t + 1] = UIElements.TextToolTip(1, 1, "Common Large") .. {
 
 --game update button
 local gameneedsupdating = false
-local buttons = {x = 20, y = 20, width = 142, height = 42, fontScale = 0.35, color = getMainColor("frames")}
+local buttons = { x = 20, y = 20, width = 142, height = 42, fontScale = 0.35, color = getMainColor("frames") }
 t[#t + 1] = Def.ActorFrame {
 	InitCommand = function(self)
-		self:xy(buttons.x,buttons.y)
+		self:xy(buttons.x, buttons.y)
 	end,
 	UIElements.QuadButton(1, 1) .. {
 		InitCommand = function(self)
@@ -178,7 +228,7 @@ t[#t + 1] = Def.ActorFrame {
 	},
 	LoadFont("Common Large") .. {
 		OnCommand = function(self)
-			self:xy(1.7, 1):align(0,0):zoom(buttons.fontScale):diffuse(getMainColor("positive"))
+			self:xy(1.7, 1):align(0, 0):zoom(buttons.fontScale):diffuse(getMainColor("positive"))
 			if gameneedsupdating then
 				self:settext(THEME:GetString("ScreenTitleMenu", "UpdateAvailable"))
 			else

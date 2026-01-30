@@ -1,136 +1,123 @@
 local defaultConfig = {
-	title = {
-		BG_Left = "#161515",
-		BG_Right = "#222222",
-		Line_Left = "#ff2c60",
-		Line_Right = "#ff2c60"
-	},
-	main = {
-		highlight = "#7a1f32",
-		frames = "#000111",
-		tabs = "#00000099",
-		enabled = "#4CBB17",
-		disabled = "#666666",
-		negative = "#FF9999",
-		positive = "#ff2c60"
-	},
-	leaderboard = {
-		background = "#111111CC",
-		border = "#000111",
-		text = "#ff2c60"
-	},
-	clearType = {
-		MFC = "#66ccff",
-		WF = "#dddddd",
-		SDP = "#cc8800",
-		PFC = "#eeaa00",
-		BF = "#999999",
-		SDG = "#448844",
-		FC = "#66cc66",
-		MF = "#cc6666",
-		SDCB = "#33bbff",
-		Clear = "#33aaff",
-		Failed = "#e61e25",
-		Invalid = "#e61e25",
-		NoPlay = "#666666",
-		None = "#666666"
+	grades = {
+		Grade_Tier06 = "#eebb00",
+		Grade_Tier07 = "#eebb00",
+		Grade_Tier08 = "#66cc66",
+		Grade_Tier09 = "#66cc66",
+		Grade_Tier10 = "#66cc66",
+		Grade_Tier11 = "#da5757",
+		Grade_Tier12 = "#da5757",
+		Grade_Tier13 = "#da5757",
+		Grade_Tier14 = "#5b78bb",
+		Grade_Tier15 = "#c97bff",
+		Grade_Tier16 = "#8c6239",
+		Grade_Tier17 = "#000000",
+		Grade_None = "#666666",
+		Grade_Failed = "#cdcdcd",
+		Grade_Tier01 = "#ffffff",
+		Grade_Tier02 = "#66ccff",
+		Grade_Tier03 = "#66ccff",
+		Grade_Tier04 = "#66ccff",
+		Grade_Tier05 = "#eebb00"
 	},
 	difficulty = {
-		Difficulty_Beginner = "#66ccff", -- light blue
-		Difficulty_Easy = "#099948", -- green
-		Difficulty_Medium = "#ddaa00", -- yellow
-		Difficulty_Hard = "#ff6666", -- red
-		Difficulty_Challenge = "#c97bff", -- light blue
-		Difficulty_Edit = "#666666", -- gray
+		Medium = "#ddaa00",
+		Hard = "#ff6666",
+		Crazy = "#cc66ff",
+		Freestyle = "#666666",
+		Edit = "#666666",
+		Difficulty_Beginner = "#66ccff",
+		Difficulty_Easy = "#099948",
+		Difficulty_Medium = "#ddaa00",
+		Difficulty_Hard = "#ff6666",
+		Difficulty_Challenge = "#c97bff",
+		Difficulty_Edit = "#666666",
+		Challenge = "#c97bff",
+		Difficulty_Crazy = "#cc66ff",
+		Difficulty_Nightmare = "#666666",
+		Difficulty_Freestyle = "#666666",
 		Beginner = "#66ccff",
-		Easy = "#099948", -- green
-		Medium = "#ddaa00", -- yellow
-		Hard = "#ff6666", -- red
-		Challenge = "#c97bff", -- Purple
-		Edit = "#666666", -- gray
-		Difficulty_Crazy = "#cc66ff",
-		Difficulty_Freestyle = "#666666",
-		Difficulty_Nightmare = "#666666",
-		Crazy = "#cc66ff",
-		Freestyle = "#666666",
-		Nightmare = "#666666"
+		Nightmare = "#666666",
+		Easy = "#099948"
 	},
-	difficultyVivid = {
-		Difficulty_Beginner = "#0099ff", -- light blue
-		Difficulty_Easy = "#00ff00", -- green
-		Difficulty_Medium = "#ffff00", -- yellow
-		Difficulty_Hard = "#ff0000", -- red
-		Difficulty_Challenge = "#cc66ff", -- light blue
-		Difficulty_Edit = "#666666", -- gray
-		Beginner = "#0099ff", -- light blue
-		Easy = "#00ff00", -- green
-		Medium = "#ffff00", -- yellow
-		Hard = "#ff0000", -- red
-		Challenge = "#cc66ff", -- Purple
-		Edit = "#666666", -- gray
-		Difficulty_Crazy = "#cc66ff",
-		Difficulty_Freestyle = "#666666",
-		Difficulty_Nightmare = "#666666",
-		Crazy = "#cc66ff",
-		Freestyle = "#666666",
-		Nightmare = "#666666"
-	},
-	grades = {
-		Grade_Tier01 = "#ffffff", -- AAAAA
-		Grade_Tier02 = "#66ccff", -- AAAA:
-		Grade_Tier03 = "#66ccff", -- AAAA.
-		Grade_Tier04 = "#66ccff", -- AAAA
-		Grade_Tier05 = "#eebb00", -- AAA:
-		Grade_Tier06 = "#eebb00", -- AAA.
-		Grade_Tier07 = "#eebb00", -- AAA
-		Grade_Tier08 = "#66cc66", -- AA:
-		Grade_Tier09 = "#66cc66", -- AA.
-		Grade_Tier10 = "#66cc66", -- AA
-		Grade_Tier11 = "#da5757", -- A:
-		Grade_Tier12 = "#da5757", -- A.
-		Grade_Tier13 = "#da5757", -- A
-		Grade_Tier14 = "#5b78bb", -- B
-		Grade_Tier15 = "#c97bff", -- C
-		Grade_Tier16 = "#8c6239", -- D
-		Grade_Tier17 = "#000000",
-		Grade_Failed = "#cdcdcd", -- F
-		Grade_None = "#666666" -- no play
-	},
+	laneCover = { bpmText = "#4CBB17", heightText = "#FFFFFF", cover = "#333333" },
+	leaderboard = { background = "#111111CC", text = "#ff2c60", border = "#000111" },
 	judgment = {
-		-- Colors of each Judgment types
-		TapNoteScore_W1 = "#99ccff",
 		TapNoteScore_W2 = "#f2cb30",
-		TapNoteScore_W3 = "#14cc8f",
-		TapNoteScore_W4 = "#1ab2ff",
-		TapNoteScore_W5 = "#ff1ab3",
-		TapNoteScore_Miss = "#cc2929",
+		TapNoteScore_W1 = "#99ccff",
+		HoldNoteScore_LetGo = "#cc2929",
 		HoldNoteScore_Held = "#f2cb30",
-		HoldNoteScore_LetGo = "#cc2929"
+		TapNoteScore_Miss = "#cc2929",
+		TapNoteScore_W5 = "#ff1ab3",
+		TapNoteScore_W4 = "#1ab2ff",
+		TapNoteScore_W3 = "#14cc8f"
 	},
-	songLength = {
-		normal = "#FFFFFF", -- normal
-		long = "#ff9a00", --orange
-		marathon = "#da5757" -- red
+	main = {
+		tabs = "#000000",
+		enabled = "#4CBB17",
+		highlight = "#7a1f32",
+		frames = "#000000",
+		negative = "#FF9999",
+		disabled = "#666666",
+		positive = "#FF2B6F"
+	},
+	title = {
+		Line_Right = "#ff2c60",
+		BG_Left = "#161515",
+		Line_Left = "#ff2c60",
+		BG_Right = "#222222"
+	},
+	clearType = {
+		SDP = "#cc8800",
+		None = "#666666",
+		PFC = "#eeaa00",
+		BF = "#999999",
+		Invalid = "#e61e25",
+		SDG = "#448844",
+		NoPlay = "#666666",
+		FC = "#66cc66",
+		Clear = "#33aaff",
+		MF = "#cc6666",
+		MFC = "#66ccff",
+		SDCB = "#33bbff",
+		Failed = "#e61e25",
+		WF = "#dddddd"
 	},
 	combo = {
-		Marv_FullCombo = "#00aeef",
 		Perf_FullCombo = "#fff568",
 		FullCombo = "#a4ff00",
 		RegularCombo = "#ffffff",
-		ComboLabel = "#00aeef"
+		ComboLabel = "#00aeef",
+		Marv_FullCombo = "#00aeef"
 	},
-	laneCover = {
-		cover = "#333333",
-		bpmText = "#4CBB17",
-		heightText = "#FFFFFF"
-	}
+	difficultyVivid = {
+		Medium = "#ffff00",
+		Hard = "#ff0000",
+		Crazy = "#cc66ff",
+		Freestyle = "#666666",
+		Edit = "#666666",
+		Difficulty_Beginner = "#0099ff",
+		Difficulty_Easy = "#00ff00",
+		Difficulty_Medium = "#ffff00",
+		Difficulty_Hard = "#ff0000",
+		Difficulty_Challenge = "#cc66ff",
+		Difficulty_Edit = "#666666",
+		Challenge = "#cc66ff",
+		Difficulty_Crazy = "#cc66ff",
+		Difficulty_Nightmare = "#666666",
+		Difficulty_Freestyle = "#666666",
+		Beginner = "#0099ff",
+		Nightmare = "#666666",
+		Easy = "#00ff00"
+	},
+	songLength = { normal = "#FFFFFF", marathon = "#da5757", long = "#ff9a00" }
 }
 
 colorConfig = create_setting("colorConfig", "colorConfig.lua", defaultConfig, -1)
 --colorConfig:load()
 
 --keys to current table. Assumes a depth of 2.
-local curColor = {"", ""}
+local curColor = { "", "" }
 
 function getTableKeys()
 	return curColor
@@ -292,7 +279,7 @@ end
 -- also if you attempt to make the colors the same as the byMSD function the graph also kills itself, dunno why and i don't really care
 function getMSDColor(MSD)
 	if MSD then
-		return HSV(math.min(220,math.max(280 - MSD*11, -40)), 0.5, 1)
+		return HSV(math.min(220, math.max(280 - MSD * 11, -40)), 0.5, 1)
 	end
 	return HSV(0, 0.9, 0.9)
 end
