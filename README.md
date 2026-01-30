@@ -20,10 +20,10 @@ This theme **is only playable on 0.74.4** and in a ratio of 16:9.
 
 ## Screenshots for a Preview 
 
-<img src="https://raw.githubusercontent.com/ifwas/reimuboobs-theme/main/Graphics/screenshotsexample/1.png"/>
-<img src="https://raw.githubusercontent.com/ifwas/reimuboobs-theme/main/Graphics/screenshotsexample/2.png"/>
-<img src="https://raw.githubusercontent.com/ifwas/reimuboobs-theme/main/Graphics/screenshotsexample/3.png"/>
-<img src="https://raw.githubusercontent.com/ifwas/reimuboobs-theme/main/Graphics/screenshotsexample/4.png"/>
+<img src="https://raw.githubusercontent.com/ItzFireable/unreadable-rain-edit/main/Graphics/screenshotsexample/1.png"/>
+<img src="https://raw.githubusercontent.com/ItzFireable/unreadable-rain-edit/main/Graphics/screenshotsexample/2.png"/>
+<img src="https://raw.githubusercontent.com/ItzFireable/unreadable-rain-edit/main/Graphics/screenshotsexample/3.png"/>
+<img src="https://raw.githubusercontent.com/ItzFireable/unreadable-rain-edit/main/Graphics/screenshotsexample/4.png"/>
 
 
 ## TODO:
